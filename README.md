@@ -5,6 +5,51 @@ code created by LoomShift GitHub app
 A TypeScript component library scaffold. Built with [tsup](https://tsup.egoist.dev/),
 it emits ESM + CJS bundles and type declarations from a single build command.
 
+## Components
+
+### `AnimatedDialog`
+
+A drop-in replacement for MUI's `Dialog` that animates its enter/exit with
+[Framer Motion](https://www.framer.com/motion/) out of the box. Every MUI
+`Dialog` prop is forwarded, so accessibility roles (`role="dialog"`,
+`aria-modal`, labelling) and focus trapping are preserved. It also honours
+`prefers-reduced-motion` by collapsing the animation to an instant transition.
+
+```tsx
+import { useState } from 'react';
+import { Button, DialogTitle, DialogContent } from '@mui/material';
+import { AnimatedDialog } from 'loomshift-example';
+
+function Example() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open</Button>
+      <AnimatedDialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Hello</DialogTitle>
+        <DialogContent>It animates automatically.</DialogContent>
+      </AnimatedDialog>
+    </>
+  );
+}
+```
+
+Animation is configured through optional, fully typed props with sensible
+defaults:
+
+| Prop       | Type                                            | Default        |
+| ---------- | ----------------------------------------------- | -------------- |
+| `variant`  | `'fade' \| 'zoom' \| 'slide-up' \| 'slide-down'`| `'zoom'`       |
+| `duration` | `number` (milliseconds)                         | `250`          |
+| `easing`   | Framer Motion easing                            | `'easeInOut'`  |
+
+```tsx
+<AnimatedDialog open={open} onClose={close} variant="slide-up" duration={400}>
+  {/* … */}
+</AnimatedDialog>
+```
+
 ## Install
 
 ```sh

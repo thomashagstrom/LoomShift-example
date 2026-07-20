@@ -7,3 +7,10 @@ export const name = 'loomshift-example';
 export function version(): string {
   return '0.0.0';
 }
+
+export { AnimatedDialog, default as AnimatedDialogDefault } from './AnimatedDialog';
+export type {
+  AnimatedDialogProps,
+  AnimatedDialogVariant,
+  AnimatedDialogEasing,
+} from './AnimatedDialog';
