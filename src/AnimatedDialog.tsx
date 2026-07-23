@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type {
   AnimationDefinition,
   Transition as MotionTransitionConfig,
+  Tween,
   Variants,
 } from 'framer-motion';
 
@@ -15,8 +16,13 @@ import type {
  */
 export type AnimatedDialogVariant = 'fade' | 'zoom' | 'slide-up' | 'slide-down';
 
-/** Easing accepted by Framer Motion (named curve, cubic-bezier array, …). */
-export type AnimatedDialogEasing = MotionTransitionConfig['ease'];
+/**
+ * Easing accepted by Framer Motion (named curve, cubic-bezier array, …).
+ *
+ * Derived from `Tween` because Framer Motion's `Transition` is a union in which
+ * `ease` only exists on some branches, so it cannot be indexed directly.
+ */
+export type AnimatedDialogEasing = NonNullable<Tween['ease']>;
 
 /**
  * Enter (`open`) and exit (`closed`) targets per variant. Framer Motion
@@ -93,10 +99,22 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
       onExited,
       // Consumed by MUI's built-in transitions; not applicable to Framer Motion.
       appear: _appear,
+      // `TransitionActions.exit` is a `boolean`, which collides with Framer Motion's
+      // `exit` variant prop on `motion.div`; drop it so the spread stays type-safe.
+      exit: _exit,
       timeout: _timeout,
       addEndListener: _addEndListener,
       mountOnEnter: _mountOnEnter,
       unmountOnExit: _unmountOnExit,
+      // MUI's `TransitionProps` extends `React.HTMLAttributes`, so it carries DOM
+      // handlers whose Framer Motion namesakes on `motion.div` have incompatible
+      // signatures (`onAnimationStart` and the drag handlers, which Framer repurposes
+      // for pan gestures). Drop them here so the spread below stays type-safe; MUI
+      // never supplies them to a transition component at runtime.
+      onAnimationStart: _onAnimationStart,
+      onDrag: _onDrag,
+      onDragStart: _onDragStart,
+      onDragEnd: _onDragEnd,
       ...rest
     } = props;
 
