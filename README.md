@@ -50,6 +50,47 @@ defaults:
 </AnimatedDialog>
 ```
 
+### `AnimatedSnackbar`
+
+A drop-in replacement for MUI's `Snackbar` that animates its enter/exit with
+Framer Motion, built as an **independent feature slice**. It reuses the same
+shared animation defaults as `AnimatedDialog` (`250ms`, `easeInOut`, and the
+`prefers-reduced-motion` handling) and is published under its own subpath
+export, so importing it never pulls in unrelated components:
+
+```tsx
+import { useState } from 'react';
+import { Button, Alert } from '@mui/material';
+import { AnimatedSnackbar } from 'loomshift-example/snackbar';
+
+function Example() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Save</Button>
+      <AnimatedSnackbar
+        open={open}
+        autoHideDuration={4000}
+        onClose={() => setOpen(false)}
+        variant="slide-up"
+      >
+        <Alert severity="success">Changes saved</Alert>
+      </AnimatedSnackbar>
+    </>
+  );
+}
+```
+
+Every MUI `Snackbar` prop is forwarded. Animation is configured through the
+same optional, fully typed props as `AnimatedDialog`:
+
+| Prop       | Type                                            | Default        |
+| ---------- | ----------------------------------------------- | -------------- |
+| `variant`  | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'`| `'slide-up'`   |
+| `duration` | `number` (milliseconds)                         | `250`          |
+| `easing`   | Framer Motion easing                            | `'easeInOut'`  |
+
 ## Install
 
 ```sh
@@ -81,6 +122,7 @@ npm install @mui/material @emotion/react @emotion/styled framer-motion react rea
 npm install        # install dev dependencies
 npm run build      # produce dist/ (ESM + CJS + .d.ts) in one command
 npm run typecheck  # type-check without emitting
+npm test           # run the unit tests (Vitest + Testing Library)
 ```
 
 The build writes:

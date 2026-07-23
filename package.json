@@ -14,6 +14,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./snackbar": {
+      "types": "./dist/snackbar/index.d.ts",
+      "import": "./dist/snackbar/index.js",
+      "require": "./dist/snackbar/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -22,6 +27,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -36,12 +42,16 @@
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.15.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "framer-motion": "^11.0.0",
+    "framer-motion": "^12.0.0",
+    "jsdom": "^25.0.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.9"
   }
 }
