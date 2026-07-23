@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Dialog from '@mui/material/Dialog';
-import type { DialogProps } from '@mui/material/Dialog';
+import Snackbar from '@mui/material/Snackbar';
+import type { SnackbarProps } from '@mui/material/Snackbar';
 import type { TransitionProps } from '@mui/material/transitions';
 import { motion, useReducedMotion } from 'framer-motion';
 import type {
@@ -12,54 +12,50 @@ import {
   DEFAULT_DURATION,
   DEFAULT_EASING,
   buildMotionTransition,
-  type MotionEasing,
-} from './shared/animation';
-
-/**
- * Built-in enter/exit animations. `variant` is fully optional on
- * {@link AnimatedDialog} and defaults to `'zoom'`.
- */
-export type AnimatedDialogVariant = 'fade' | 'zoom' | 'slide-up' | 'slide-down';
-
-/** Easing accepted by Framer Motion (named curve, cubic-bezier array, …). */
-export type AnimatedDialogEasing = MotionEasing;
+} from '../shared/animation';
+import type {
+  AnimatedSnackbarEasing,
+  AnimatedSnackbarProps,
+  AnimatedSnackbarVariant,
+} from './types';
 
 /**
  * Enter (`open`) and exit (`closed`) targets per variant. Framer Motion
  * interpolates between them; reduced motion collapses the duration to `0`.
  */
-const VARIANTS: Record<AnimatedDialogVariant, Variants> = {
+const VARIANTS: Record<AnimatedSnackbarVariant, Variants> = {
   fade: {
     closed: { opacity: 0 },
     open: { opacity: 1 },
   },
-  zoom: {
-    closed: { opacity: 0, scale: 0.92 },
+  grow: {
+    closed: { opacity: 0, scale: 0.85 },
     open: { opacity: 1, scale: 1 },
   },
   'slide-up': {
-    closed: { opacity: 0, y: 32 },
+    closed: { opacity: 0, y: 24 },
     open: { opacity: 1, y: 0 },
   },
   'slide-down': {
-    closed: { opacity: 0, y: -32 },
+    closed: { opacity: 0, y: -24 },
     open: { opacity: 1, y: 0 },
   },
 };
 
-const DEFAULT_VARIANT: AnimatedDialogVariant = 'zoom';
+const DEFAULT_VARIANT: AnimatedSnackbarVariant = 'slide-up';
 
 /**
- * Props passed to the internal Framer Motion transition by {@link AnimatedDialog}.
+ * Props passed to the internal Framer Motion transition by
+ * {@link AnimatedSnackbar}.
  *
  * MUI's `TransitionProps` declares its own (incompatible) `easing`, so it is
  * omitted here and replaced with the Framer Motion easing type.
  */
 interface MotionTransitionProps extends Omit<TransitionProps, 'easing'> {
   children: React.ReactElement;
-  variant?: AnimatedDialogVariant;
+  variant?: AnimatedSnackbarVariant;
   duration?: number;
-  easing?: AnimatedDialogEasing;
+  easing?: AnimatedSnackbarEasing;
 }
 
 function setRef<T>(ref: React.Ref<T> | undefined, value: T | null): void {
@@ -71,13 +67,13 @@ function setRef<T>(ref: React.Ref<T> | undefined, value: T | null): void {
 }
 
 /**
- * Drop-in `TransitionComponent` for MUI's `Dialog`/`Modal`.
+ * Drop-in `TransitionComponent` for MUI's `Snackbar`.
  *
- * MUI keeps the dialog mounted while `in` is `false` and only unmounts once the
- * transition reports `onExited`, so this component drives that lifecycle from
- * Framer Motion's animation callbacks. The wrapping `motion.div` fills the modal
- * root (`height: 100%`) so the inner `MuiDialog-container` keeps centering the
- * dialog exactly as it does with MUI's built-in transitions.
+ * MUI keeps the snackbar mounted while `in` is `false` and only unmounts once
+ * the transition reports `onExited`, so this component drives that lifecycle
+ * from Framer Motion's animation callbacks. Unlike the dialog transition, the
+ * wrapper does not stretch to fill its parent so the snackbar keeps its
+ * intrinsic size and anchor position.
  */
 const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>(
   function MotionTransition(props, ref) {
@@ -161,7 +157,7 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
         transition={transition}
         onAnimationStart={handleStart}
         onAnimationComplete={handleComplete}
-        style={{ height: '100%', outline: 'none', ...style }}
+        style={{ outline: 'none', ...style }}
         {...rest}
       >
         {children}
@@ -170,38 +166,31 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
   },
 );
 
-export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionComponent'> {
-  /** Enter/exit animation preset. Defaults to `'zoom'`. */
-  variant?: AnimatedDialogVariant;
-  /** Animation duration in milliseconds. Defaults to `250`. */
-  duration?: number;
-  /** Framer Motion easing curve. Defaults to `'easeInOut'`. */
-  easing?: AnimatedDialogEasing;
-}
-
 /**
- * A MUI `Dialog` that animates its enter/exit with Framer Motion out of the box.
+ * A MUI `Snackbar` that animates its enter/exit with Framer Motion out of the
+ * box.
  *
- * All MUI `Dialog` props are supported and forwarded, so accessibility roles
- * (`role="dialog"`, `aria-modal`, labelling) and focus trapping are preserved.
- * Users who set `prefers-reduced-motion` get an instant, motion-free transition.
+ * All MUI `Snackbar` props are supported and forwarded, so `autoHideDuration`,
+ * anchoring and accessibility roles are preserved. Users who set
+ * `prefers-reduced-motion` get an instant, motion-free transition. Animation
+ * defaults are shared with the rest of the library (see `../shared/animation`).
  */
-export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogProps>(
-  function AnimatedDialog(
+export const AnimatedSnackbar = React.forwardRef<HTMLDivElement, AnimatedSnackbarProps>(
+  function AnimatedSnackbar(
     {
       variant = DEFAULT_VARIANT,
       duration = DEFAULT_DURATION,
       easing = DEFAULT_EASING,
       TransitionProps: transitionProps,
-      ...dialogProps
+      ...snackbarProps
     },
     ref,
   ) {
     return (
-      <Dialog
+      <Snackbar
         ref={ref}
         TransitionComponent={
-          MotionTransition as unknown as NonNullable<DialogProps['TransitionComponent']>
+          MotionTransition as unknown as NonNullable<SnackbarProps['TransitionComponent']>
         }
         TransitionProps={
           {
@@ -211,10 +200,10 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
             easing,
           } as unknown as TransitionProps
         }
-        {...dialogProps}
+        {...snackbarProps}
       />
     );
   },
 );
 
-export default AnimatedDialog;
+export default AnimatedSnackbar;
