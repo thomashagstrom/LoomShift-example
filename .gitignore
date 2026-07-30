@@ -16,6 +16,10 @@
 /build
 /dist
 
+# storybook
+/storybook-static
+*.storybook.log
+
 # misc
 .DS_Store
 *.pem

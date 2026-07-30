@@ -1,0 +1,109 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+{/* Mirrors the README so the two never drift apart. */}
+
+<Meta title="Getting Started" />
+
+# loomshift-example
+
+MUI components that animate their enter/exit with Framer Motion out of the box.
+Every component is a drop-in replacement for its MUI counterpart: all upstream
+props are forwarded, accessibility semantics are preserved, and
+`prefers-reduced-motion` is honoured automatically.
+
+## Install
+
+```sh
+npm install loomshift-example
+```
+
+## Peer dependencies
+
+MUI and Framer Motion (and their runtime peers) are declared as
+`peerDependencies` so they are **not** bundled — your app provides a single
+shared copy.
+
+| Package           | Supported range                 |
+| ----------------- | ------------------------------- |
+| `react`           | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `react-dom`       | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `@mui/material`   | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0` |
+| `@emotion/react`  | `^11.0.0`                       |
+| `@emotion/styled` | `^11.0.0`                       |
+| `framer-motion`   | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+
+```sh
+npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+```
+
+## Your first component
+
+Components ship from the package root, and each feature slice also has its own
+subpath export so importing one never pulls in the others.
+
+```tsx
+import { useState } from 'react';
+import { Button, DialogTitle, DialogContent } from '@mui/material';
+import { AnimatedDialog } from 'loomshift-example';
+
+function Example() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open</Button>
+      <AnimatedDialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Hello</DialogTitle>
+        <DialogContent>It animates automatically.</DialogContent>
+      </AnimatedDialog>
+    </>
+  );
+}
+```
+
+```tsx
+// Feature-sliced subpath export
+import { AnimatedSnackbar } from 'loomshift-example/snackbar';
+```
+
+## Customizing the animation
+
+Three optional, fully typed props tune the animation on every component. Their
+defaults are shared across the library, so untouched components stay consistent.
+
+| Prop       | Type                    | Default                                 |
+| ---------- | ----------------------- | --------------------------------------- |
+| `variant`  | component-specific enum | `'zoom'` (dialog), `'slide-up'` (snackbar) |
+| `duration` | `number` (milliseconds) | `250`                                   |
+| `easing`   | Framer Motion easing    | `'easeInOut'`                           |
+
+```tsx
+<AnimatedDialog open={open} onClose={close} variant="slide-up" duration={400} easing="anticipate">
+  {/* … */}
+</AnimatedDialog>
+```
+
+### Disabling the animation
+
+Pass `duration={0}` for an instant, motion-free transition:
+
+```tsx
+<AnimatedDialog open={open} onClose={close} duration={0}>
+  {/* … */}
+</AnimatedDialog>
+```
+
+This is exactly what visitors who set `prefers-reduced-motion: reduce` get
+automatically — no configuration needed on your side.
+
+## What you get
+
+- ESM (`import`) and CommonJS (`require`) bundles
+- TypeScript declarations (`.d.ts`) for every export
+- Per-component subpath exports for tree-shakeable imports
+
+## Components
+
+Open the **Feedback** group in the sidebar for a live playground per component:
+`AnimatedDialog` and `AnimatedSnackbar`. Each page has editable Controls for
+`variant`, `duration` and `easing`, plus an auto-generated props table.

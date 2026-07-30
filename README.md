@@ -5,6 +5,34 @@ code created by LoomShift GitHub app
 A TypeScript component library scaffold. Built with [tsup](https://tsup.egoist.dev/),
 it emits ESM + CJS bundles and type declarations from a single build command.
 
+Every component has a live playground with editable prop controls — run
+`npm run storybook` (see [Documentation](#documentation)).
+
+## Install
+
+```sh
+npm install loomshift-example
+```
+
+### Peer dependencies
+
+MUI and Framer Motion (and their runtime peers) are declared as `peerDependencies`
+so they are **not** bundled — the consuming app provides a single shared copy.
+Install them alongside this package if you haven't already:
+
+| Package             | Supported range                     |
+| ------------------- | ----------------------------------- |
+| `react`             | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `react-dom`         | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `@mui/material`     | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`    |
+| `@emotion/react`    | `^11.0.0`                           |
+| `@emotion/styled`   | `^11.0.0`                           |
+| `framer-motion`     | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+
+```sh
+npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+```
+
 ## Components
 
 ### `AnimatedDialog`
@@ -91,30 +119,50 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
-## Install
+## Customizing the animation
 
-```sh
-npm install loomshift-example
+`variant`, `duration` and `easing` are optional on every component, so the
+defaults above apply until you override them:
+
+```tsx
+<AnimatedSnackbar open={open} onClose={close} variant="grow" duration={600} easing="anticipate">
+  <Alert severity="info">Slower, springier</Alert>
+</AnimatedSnackbar>
 ```
 
-### Peer dependencies
+### Disabling the animation
 
-MUI and Framer Motion (and their runtime peers) are declared as `peerDependencies`
-so they are **not** bundled — the consuming app provides a single shared copy.
-Install them alongside this package if you haven't already:
+Pass `duration={0}` for an instant, motion-free transition:
 
-| Package             | Supported range                     |
-| ------------------- | ----------------------------------- |
-| `react`             | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
-| `react-dom`         | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
-| `@mui/material`     | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`    |
-| `@emotion/react`    | `^11.0.0`                           |
-| `@emotion/styled`   | `^11.0.0`                           |
-| `framer-motion`     | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+```tsx
+<AnimatedDialog open={open} onClose={close} duration={0}>
+  <DialogTitle>No animation</DialogTitle>
+</AnimatedDialog>
+```
+
+That is exactly what visitors who set `prefers-reduced-motion: reduce` get
+automatically — the shared transition collapses the duration to zero for them,
+with no configuration on your side.
+
+## Documentation
+
+The docs site is a [Storybook](https://storybook.js.org/): a live playground per
+component with editable controls for `open`, `variant`, `duration`, `easing`
+(and `autoHideDuration` on the snackbar), plus a props table generated from each
+component's own TypeScript types.
 
 ```sh
-npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+npm run storybook        # start the docs site on http://localhost:6006
+npm run build-storybook  # build the static site into storybook-static/
 ```
+
+- `Getting Started` mirrors this README (install, peer deps, first component).
+- `Feedback/AnimatedDialog` and `Feedback/AnimatedSnackbar` document each
+  component, including `Custom Animation` and `No Animation` stories.
+
+Stories live next to the component they document (`src/**/*.stories.tsx`), so a
+feature slice always ships its own docs. `src/stories.test.tsx` renders every
+story in the unit-test run, so a broken example fails CI instead of the docs.
 
 ## Development
 
@@ -123,6 +171,7 @@ npm install        # install dev dependencies
 npm run build      # produce dist/ (ESM + CJS + .d.ts) in one command
 npm run typecheck  # type-check without emitting
 npm test           # run the unit tests (Vitest + Testing Library)
+npm run storybook  # start the docs site (see Documentation)
 ```
 
 The build writes:
