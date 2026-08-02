@@ -1,0 +1,100 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# LoomShift-example
+
+Animated, drop-in replacements for MUI components. Every component forwards the
+full MUI prop surface, animates with [Framer Motion](https://www.framer.com/motion/)
+out of the box, and honours `prefers-reduced-motion`.
+
+## Install
+
+```sh
+npm install loomshift-example
+```
+
+MUI and Framer Motion are peer dependencies, so they are **not** bundled — the
+consuming app provides a single shared copy:
+
+```sh
+npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+```
+
+| Package           | Supported range                     |
+| ----------------- | ----------------------------------- |
+| `react`           | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `react-dom`       | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `@mui/material`   | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`    |
+| `@emotion/react`  | `^11.0.0`                           |
+| `@emotion/styled` | `^11.0.0`                           |
+| `framer-motion`   | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+
+## Components
+
+<div
+  style={{
+    display: 'grid',
+    gap: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    margin: '16px 0 24px',
+  }}
+>
+  <div style={{ border: '1px solid rgba(128,128,128,.3)', borderRadius: 8, padding: '16px' }}>
+    <h3 style={{ margin: '0 0 8px' }}>
+      <a href="?path=/docs/components-animateddialog--docs" target="_top">
+        AnimatedDialog
+      </a>
+    </h3>
+    <p style={{ margin: '0 0 8px' }}>
+      An MUI <code>Dialog</code> that animates its enter/exit. Defaults to the{' '}
+      <code>zoom</code> variant.
+    </p>
+    <code>{"import { AnimatedDialog } from 'loomshift-example';"}</code>
+  </div>
+
+  <div style={{ border: '1px solid rgba(128,128,128,.3)', borderRadius: 8, padding: '16px' }}>
+    <h3 style={{ margin: '0 0 8px' }}>
+      <a href="?path=/docs/components-animatedsnackbar--docs" target="_top">
+        AnimatedSnackbar
+      </a>
+    </h3>
+    <p style={{ margin: '0 0 8px' }}>
+      An MUI <code>Snackbar</code> on its own subpath export. Defaults to the{' '}
+      <code>slide-up</code> variant.
+    </p>
+    <code>{"import { AnimatedSnackbar } from 'loomshift-example/snackbar';"}</code>
+  </div>
+</div>
+
+## Customising the animation
+
+Each component takes the same three optional, fully typed animation props:
+
+| Prop       | Type                                | Default       |
+| ---------- | ----------------------------------- | ------------- |
+| `variant`  | Per-component union of presets      | see component |
+| `duration` | `number` (milliseconds)             | `250`         |
+| `easing`   | Framer Motion easing                | `'easeInOut'` |
+
+```tsx
+<AnimatedDialog open={open} onClose={close} variant="slide-up" duration={600} easing={[0.22, 1, 0.36, 1]}>
+  {/* … */}
+</AnimatedDialog>
+```
+
+To **disable** the animation, pass `duration={0}` — the component still mounts
+and unmounts through the same lifecycle, just instantly:
+
+```tsx
+<AnimatedDialog open={open} onClose={close} duration={0}>
+  {/* … */}
+</AnimatedDialog>
+```
+
+The same happens automatically for anyone whose system sets
+`prefers-reduced-motion: reduce`, so you rarely need to opt out by hand.
+
+Open any component's **Canvas** tab to edit `variant`, `duration`, `easing` and
+`open` live from the Controls panel, and use the toolbar's remount control to
+replay an animation.
