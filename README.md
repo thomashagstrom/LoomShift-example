@@ -5,6 +5,31 @@ code created by LoomShift GitHub app
 A TypeScript component library scaffold. Built with [tsup](https://tsup.egoist.dev/),
 it emits ESM + CJS bundles and type declarations from a single build command.
 
+## Install
+
+```sh
+npm install loomshift-example
+```
+
+### Peer dependencies
+
+MUI and Framer Motion (and their runtime peers) are declared as `peerDependencies`
+so they are **not** bundled — the consuming app provides a single shared copy.
+Install them alongside this package if you haven't already:
+
+| Package             | Supported range                     |
+| ------------------- | ----------------------------------- |
+| `react`             | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `react-dom`         | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
+| `@mui/material`     | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`    |
+| `@emotion/react`    | `^11.0.0`                           |
+| `@emotion/styled`   | `^11.0.0`                           |
+| `framer-motion`     | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+
+```sh
+npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+```
+
 ## Components
 
 ### `AnimatedDialog`
@@ -91,30 +116,50 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
-## Install
+## Customising or disabling the animation
 
-```sh
-npm install loomshift-example
+`duration` and `easing` are shared by every component, so you can map them onto
+your own motion tokens. `easing` accepts any Framer Motion easing — a named
+curve or a cubic-bezier array:
+
+```tsx
+<AnimatedDialog
+  open={open}
+  onClose={close}
+  variant="slide-up"
+  duration={600}
+  easing={[0.22, 1, 0.36, 1]}
+>
+  {/* … */}
+</AnimatedDialog>
 ```
 
-### Peer dependencies
+To turn the animation **off**, pass `duration={0}`. The component still mounts
+and unmounts through the same lifecycle, it just transitions instantly:
 
-MUI and Framer Motion (and their runtime peers) are declared as `peerDependencies`
-so they are **not** bundled — the consuming app provides a single shared copy.
-Install them alongside this package if you haven't already:
+```tsx
+<AnimatedSnackbar open={open} onClose={close} duration={0}>
+  <Alert severity="success">Saved</Alert>
+</AnimatedSnackbar>
+```
 
-| Package             | Supported range                     |
-| ------------------- | ----------------------------------- |
-| `react`             | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
-| `react-dom`         | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` |
-| `@mui/material`     | `^5.0.0 \|\| ^6.0.0 \|\| ^7.0.0`    |
-| `@emotion/react`    | `^11.0.0`                           |
-| `@emotion/styled`   | `^11.0.0`                           |
-| `framer-motion`     | `^10.0.0 \|\| ^11.0.0 \|\| ^12.0.0` |
+You rarely need to opt out by hand: anyone whose system sets
+`prefers-reduced-motion: reduce` already gets the instant transition.
+
+## Documentation
+
+An interactive [Storybook](https://storybook.js.org/) covers every component
+with live previews, an auto-generated props table and editable controls for
+`variant`, `duration`, `easing` and `open`:
 
 ```sh
-npm install @mui/material @emotion/react @emotion/styled framer-motion react react-dom
+npm run storybook        # dev server on http://localhost:6006
+npm run build-storybook  # static site in storybook-static/
 ```
+
+Stories live next to the component they document (`src/**/*.stories.tsx`), so a
+feature slice ships its docs with its code. The `Introduction` page
+(`docs/Introduction.mdx`) is the landing page.
 
 ## Development
 
@@ -122,7 +167,9 @@ npm install @mui/material @emotion/react @emotion/styled framer-motion react rea
 npm install        # install dev dependencies
 npm run build      # produce dist/ (ESM + CJS + .d.ts) in one command
 npm run typecheck  # type-check without emitting
+npm run lint       # lint with ESLint
 npm test           # run the unit tests (Vitest + Testing Library)
+npm run storybook  # browse the component docs
 ```
 
 The build writes:
