@@ -4,9 +4,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # LoomShift-example
 
-Animated, drop-in replacements for MUI components. Every component forwards the
-full MUI prop surface, animates with [Framer Motion](https://www.framer.com/motion/)
-out of the box, and honours `prefers-reduced-motion`.
+Composable MUI building blocks. Every component forwards the full MUI prop
+surface it is built on. The animated drop-in replacements animate with
+[Framer Motion](https://www.framer.com/motion/) out of the box and honour
+`prefers-reduced-motion`.
 
 ## Install
 
@@ -65,11 +66,25 @@ npm install @mui/material @emotion/react @emotion/styled framer-motion react rea
     </p>
     <code>{"import { AnimatedSnackbar } from 'loomshift-example/snackbar';"}</code>
   </div>
+
+  <div style={{ border: '1px solid rgba(128,128,128,.3)', borderRadius: 8, padding: '16px' }}>
+    <h3 style={{ margin: '0 0 8px' }}>
+      <a href="?path=/docs/components-confirmactions--docs" target="_top">
+        ConfirmActions
+      </a>
+    </h3>
+    <p style={{ margin: '0 0 8px' }}>
+      The reusable Ok/Cancel pair for dialogs and form footers, on its own subpath
+      export. Separate <code>onOk</code> and <code>onCancel</code> callbacks.
+    </p>
+    <code>{"import { ConfirmActions } from 'loomshift-example/confirm-actions';"}</code>
+  </div>
 </div>
 
 ## Customising the animation
 
-Each component takes the same three optional, fully typed animation props:
+Each animated component takes the same three optional, fully typed animation
+props:
 
 | Prop       | Type                                | Default       |
 | ---------- | ----------------------------------- | ------------- |

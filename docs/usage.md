@@ -114,6 +114,62 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
+### `ConfirmActions`
+
+The reusable Ok/Cancel pair, published under its own subpath export. Ok comes
+first in both the DOM and the visual order, so tab order follows what the user
+sees, and both are plain MUI `Button`s — keyboard-focusable and activated with
+Enter or Space. `onOk` and `onCancel` are separate callbacks, each firing once
+per click:
+
+```tsx
+import { ConfirmActions } from 'loomshift-example/confirm-actions';
+
+function Example({ onClose }: { onClose: () => void }) {
+  return <ConfirmActions onOk={() => save().then(onClose)} onCancel={onClose} />;
+}
+```
+
+Its most common home is a dialog's `DialogActions`. Labelling and focus trapping
+come from the dialog, so `ConfirmActions` only renders the buttons:
+
+```tsx
+<AnimatedDialog open={open} onClose={close}>
+  <DialogTitle>Delete project?</DialogTitle>
+  <DialogContent>
+    <DialogContentText>This removes the project for every member.</DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <ConfirmActions confirmLabel="Delete" destructive onOk={destroy} onCancel={close} />
+  </DialogActions>
+</AnimatedDialog>
+```
+
+| Prop                          | Type                              | Default    |
+| ----------------------------- | --------------------------------- | ---------- |
+| `onOk` / `onCancel`           | `() => void` (required)           | —          |
+| `confirmLabel`                | `string`                          | `'Ok'`     |
+| `cancelLabel`                 | `string`                          | `'Cancel'` |
+| `emphasis`                    | `'high' \| 'low'`                 | `'high'`   |
+| `align`                       | `'left' \| 'center' \| 'right'`   | `'right'`  |
+| `destructive`                 | `boolean`                         | `false`    |
+| `pending`                     | `boolean`                         | —          |
+| `disableConfirm`              | `boolean`                         | `false`    |
+| `fullWidth`                   | `boolean`                         | `false`    |
+| `okButtonProps` / `cancelButtonProps` | `ButtonProps`             | —          |
+
+The host owns the async state. Pass `pending` while your promise is in flight:
+the confirm button shows a spinner and stops accepting clicks, Cancel stays
+interactive, and the reserved spinner slot keeps the button the same width in
+both states so nothing shifts.
+
+```tsx
+<ConfirmActions confirmLabel="Save" pending={saving} onOk={save} onCancel={close} />
+```
+
+Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
+`spacing` work as usual.
+
 ## Customising or disabling the animation
 
 `duration` and `easing` are shared by every component, so you can map them onto
