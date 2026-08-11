@@ -19,6 +19,11 @@
       "import": "./dist/snackbar/index.js",
       "require": "./dist/snackbar/index.cjs"
     },
+    "./confirm-actions": {
+      "types": "./dist/confirm-actions/index.d.ts",
+      "import": "./dist/confirm-actions/index.js",
+      "require": "./dist/confirm-actions/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -52,6 +57,7 @@
     "@storybook/react-vite": "^10.5.5",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^2.1.9",

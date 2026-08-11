@@ -24,16 +24,29 @@ motion so the message feels noticed rather than just appearing and vanishing.
 **Use it when:** you want short-lived confirmations or status messages to
 feel more alive and easier to notice.
 
+## ConfirmActions
+
+The pair of "Ok" and "Cancel" buttons that ends a confirmation. Any screen can
+drop it in — a dialog, a form footer, an inline panel — and get the same
+wording, order and styling every time, instead of each screen hand-rolling its
+own pair. The labels can be changed ("Save"/"Discard", "Delete"/"Cancel"), and
+it can show a spinner while the action is still finishing.
+
+**Use it when:** a screen asks the user to confirm or back out of something and
+you want that choice to look and behave the same everywhere in the product.
+
 ## Shared behaviour
 
-Every component in this library:
+Every component in this library keeps all the accessibility behaviour (screen
+reader support, keyboard focus order) of the standard MUI components it is
+built from.
 
-- Respects users' "reduce motion" accessibility setting by skipping the
+The animated components — `AnimatedDialog` and `AnimatedSnackbar` — also:
+
+- Respect users' "reduce motion" accessibility setting by skipping the
   animation for people who need it.
-- Can have its animation turned off entirely if a project doesn't want any
+- Can have their animation turned off entirely if a project doesn't want any
   motion.
-- Keeps all the accessibility behaviour (screen reader support, keyboard
-  focus) of the standard component it replaces.
 
 This means adopting an animated component is a safe, low-risk swap — nothing
 about how the component is used or who can use it changes, only how it
