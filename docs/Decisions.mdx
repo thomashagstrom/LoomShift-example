@@ -1,0 +1,97 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Decisions" />
+
+# Decisions
+
+Answers to the two open questions that had to be settled before any further
+motion work or confirm surface is built. Both answers already match the code and
+the stories, so this page records what the library does rather than proposing a
+change.
+
+## Motion source: Framer Motion
+
+**Every animation in this library comes from
+[Framer Motion](https://www.framer.com/motion/), the motion library already
+declared as a peer dependency — not from a new bespoke effect.**
+
+- `AnimatedDialog` and `AnimatedSnackbar` animate through Framer Motion's
+  `motion` components today, and both read their transition from the shared
+  tokens in `src/shared/animation.ts` (`250ms`, `easeInOut`).
+- Framer Motion is a `peerDependency`, so the consuming app provides a single
+  shared copy. A second motion source would ship a duplicate animation runtime.
+- Framer Motion's `useReducedMotion` gives every component the same
+  `prefers-reduced-motion` handling from one place, via `buildMotionTransition`.
+- "Fancy animations" therefore means **a new `variant` preset on an existing
+  component**, expressed as Framer Motion enter/exit targets — not a new
+  animation mechanism.
+
+Not chosen, and why:
+
+- **A bespoke ripple, scale-bounce or glow effect.** Hand-rolled CSS keyframes
+  would sit outside `buildMotionTransition`, so `duration`, `easing` and
+  reduced motion would each need a second implementation.
+- **MUI's own transitions (`Fade`, `Grow`, `Slide`).** These components
+  deliberately replace them; keeping both leaves two timing systems competing
+  on the same element.
+- **A second motion library.** Nothing needed here is missing from Framer
+  Motion, and the peer-dependency range is part of the public surface.
+
+```tsx
+<AnimatedDialog
+  open={open}
+  onClose={close}
+  variant="slide-up"
+  duration={600}
+  easing={[0.22, 1, 0.36, 1]}
+>
+  {/* … */}
+</AnimatedDialog>
+```
+
+## ConfirmActions: order and first placement
+
+**Ok comes first and Cancel second in both the DOM and the visual order, and the
+first target surface is the modal confirmation dialog — inline form footers are
+supported by the same component, but the dialog is what the defaults are tuned
+for.**
+
+- One order in both the DOM and on screen means tab order follows what the user
+  sees, with no `tabIndex` juggling. This is covered by tests.
+- A modal confirmation dialog is the surface where an inconsistent pair hurts
+  most: it is the last step before a destructive action, and the host dialog
+  already owns labelling and focus trapping, so the component only has to render
+  two buttons.
+- The defaults (`align="right"`, `emphasis="high"`) are the dialog footer case,
+  so dropping the pair into `DialogActions` needs no props beyond the callbacks.
+- Inline forms are a supported second surface, not a separate component:
+  `emphasis="low"`, `align` and `fullWidth` cover them — see the
+  **InlineFormFooter** story.
+
+Not chosen, and why:
+
+- **Cancel first.** It would reverse either the DOM order or the visual order,
+  and the two must stay in step for keyboard users.
+- **Inline forms first.** Their placement varies per screen, so they cannot
+  settle the defaults; the dialog footer can.
+- **Both surfaces as equal first targets.** With no primary surface, `align`
+  and `emphasis` have no obvious default value.
+
+```tsx
+<AnimatedDialog open={open} onClose={close}>
+  <DialogTitle>Delete project?</DialogTitle>
+  <DialogContent>
+    <DialogContentText>This removes the project for every member.</DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <ConfirmActions confirmLabel="Delete" destructive onOk={destroy} onCancel={close} />
+  </DialogActions>
+</AnimatedDialog>
+```
+
+## Where each answer lives
+
+| Question                                | Owned by                               |
+| --------------------------------------- | -------------------------------------- |
+| Which animation source do we use?       | `src/shared/animation.ts`              |
+| Button order and first placement        | `src/confirm-actions/ConfirmActions.tsx` |

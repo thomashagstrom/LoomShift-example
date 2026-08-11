@@ -172,6 +172,13 @@ Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 
 ## Customising or disabling the animation
 
+[Framer Motion](https://www.framer.com/motion/) is the only motion source in the
+library: every animation is a Framer Motion preset built on the shared tokens in
+`src/shared/animation.ts`, never a hand-rolled effect. Adding a new animation
+means adding a `variant` to an existing component. The reasoning, and the
+matching decision on `ConfirmActions` button order and first surface, are
+recorded on the **Decisions** page (`docs/Decisions.mdx`).
+
 `duration` and `easing` are shared by every component, so you can map them onto
 your own motion tokens. `easing` accepts any Framer Motion easing — a named
 curve or a cubic-bezier array:
@@ -213,4 +220,5 @@ npm run build-storybook  # static site in storybook-static/
 
 Stories live next to the component they document (`src/**/*.stories.tsx`), so a
 feature slice ships its docs with its code. The `Introduction` page
-(`docs/Introduction.mdx`) is the landing page.
+(`docs/Introduction.mdx`) is the landing page, and the `Decisions` page
+(`docs/Decisions.mdx`) records the settled cross-component choices.

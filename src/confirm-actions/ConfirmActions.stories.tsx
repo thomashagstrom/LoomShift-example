@@ -71,6 +71,29 @@ type Story = StoryObj<typeof meta>;
 /** Every prop is editable from the Controls panel. */
 export const Playground: Story = {};
 
+export const ButtonOrder: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The settled default: **Ok first, Cancel second** in both the DOM and the',
+          'visual order, right-aligned (`align="right"`), so tab order follows what the',
+          'user sees. The **modal confirmation dialog** is the first target surface —',
+          'these defaults are tuned for a `DialogActions` footer, which is why the',
+          'InDialog story needs no props beyond the callbacks. Inline forms are a',
+          'supported second surface via `emphasis`, `align` and `fullWidth`. See the',
+          'Decisions page for the reasoning.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <Stack sx={{ width: 320 }}>
+      <ConfirmActions {...args} />
+    </Stack>
+  ),
+};
+
 export const InDialog: Story = {
   args: { confirmLabel: 'Delete', destructive: true },
   parameters: {
