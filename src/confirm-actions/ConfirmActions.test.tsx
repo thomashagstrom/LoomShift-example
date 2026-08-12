@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConfirmActions } from './ConfirmActions';
 
@@ -43,6 +43,23 @@ function withUnhandledRejectionsCaught() {
 
 /** Lets node reach the end of the turn, where it reports unhandled rejections. */
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+/** Resolves once Framer Motion has had a frame to advance its animations. */
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+/** Pointer-event init for the two input methods the press has to cover. */
+const MOUSE_PRESS = { pointerType: 'mouse', button: 0, isPrimary: true };
+const TOUCH_PRESS = { pointerType: 'touch', isPrimary: true };
+
+/**
+ * How far the button has sunk into its press, read back off the inline
+ * transform Framer Motion writes: `0` at rest, growing towards `0.04` at the
+ * bottom of the default `'scale'` press.
+ */
+function pressDepth(element: HTMLElement): number {
+  const scale = /scale\(([\d.]+)\)/.exec(element.style.transform);
+  return scale ? 1 - Number(scale[1]) : 0;
+}
 
 describe('ConfirmActions', () => {
   it('renders Ok before Cancel with default labels', () => {
@@ -235,5 +252,135 @@ describe('ConfirmActions', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Ok' }).getAttribute('type')).toBe('submit');
+  });
+
+  describe('press animation', () => {
+    it.each([
+      ['mouse', 'Ok', MOUSE_PRESS],
+      ['touch', 'Ok', TOUCH_PRESS],
+      ['mouse', 'Cancel', MOUSE_PRESS],
+      ['touch', 'Cancel', TOUCH_PRESS],
+    ])('starts on %s pointer-down over %s', async (_input, name, pointer) => {
+      render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} />);
+
+      const button = screen.getByRole('button', { name });
+      expect(pressDepth(button)).toBe(0);
+
+      fireEvent.pointerDown(button, pointer);
+
+      // The timeout is the budget from the acceptance criteria: the press has to
+      // be visibly under way within 100ms of pointer-down.
+      await waitFor(() => expect(pressDepth(button)).toBeGreaterThan(0), {
+        timeout: 100,
+        interval: 5,
+      });
+    });
+
+    it('settles back to rest when the press is released', async () => {
+      render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+      await waitFor(() => expect(pressDepth(ok)).toBeGreaterThan(0));
+
+      fireEvent.pointerUp(ok, MOUSE_PRESS);
+
+      await waitFor(() => expect(pressDepth(ok)).toBe(0), { timeout: 300 });
+    });
+
+    it('fires onOk without waiting for the animation to finish', async () => {
+      const onOk = vi.fn();
+      render(<ConfirmActions onOk={onOk} onCancel={vi.fn()} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+      await waitFor(() => expect(pressDepth(ok)).toBeGreaterThan(0));
+
+      // The click lands while the press is still animating, and the handler runs
+      // there and then — the animation is never on the callback's path.
+      fireEvent.click(ok);
+      expect(onOk).toHaveBeenCalledTimes(1);
+      expect(pressDepth(ok)).toBeGreaterThan(0);
+    });
+
+    it('restarts cleanly on rapid repeated clicks and leaves no stuck press', async () => {
+      const onOk = vi.fn();
+      render(<ConfirmActions onOk={onOk} onCancel={vi.fn()} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      // Each press is interrupted a frame in, so every restart has to pick up
+      // from wherever the last one got to.
+      for (let click = 0; click < 3; click += 1) {
+        fireEvent.pointerDown(ok, MOUSE_PRESS);
+        await nextFrame();
+        fireEvent.pointerUp(ok, MOUSE_PRESS);
+        fireEvent.click(ok);
+        await nextFrame();
+      }
+
+      expect(onOk).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(pressDepth(ok)).toBe(0), { timeout: 300 });
+    });
+
+    it.each([
+      ['pressVariant="none"', { pressVariant: 'none' } as const],
+      ['duration={0}', { duration: 0 } as const],
+    ])('leaves the buttons untransformed with %s', async (_case, props) => {
+      render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} {...props} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+      await nextFrame();
+      await nextFrame();
+
+      // Nothing animated at all, so MUI's own ripple is the only feedback.
+      expect(ok.style.transform).toBe('');
+    });
+
+    it('animates a keyboard press and releases it on key-up', async () => {
+      render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} />);
+
+      // Enter and Space activate a native `<button>`, so they get the same
+      // feedback as a pointer press.
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.keyDown(ok, { key: 'Enter' });
+      await waitFor(() => expect(pressDepth(ok)).toBeGreaterThan(0), { timeout: 100 });
+
+      fireEvent.keyUp(ok, { key: 'Enter' });
+      await waitFor(() => expect(pressDepth(ok)).toBe(0), { timeout: 300 });
+    });
+
+    it('releases the press when the pointer is let go off the button', async () => {
+      // A confirm that goes busy disables the button mid-press, so the release
+      // never reaches it — the press still has to end rather than stick down.
+      render(<ConfirmActions onOk={() => new Promise<void>(() => {})} onCancel={vi.fn()} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+      fireEvent.click(ok);
+      await waitFor(() => expect(pressDepth(ok)).toBeGreaterThan(0));
+      expect(ok).toHaveProperty('disabled', true);
+
+      fireEvent.pointerUp(window, MOUSE_PRESS);
+
+      await waitFor(() => expect(pressDepth(ok)).toBe(0), { timeout: 300 });
+    });
+
+    it('accepts a lift press with a custom easing', async () => {
+      render(
+        <ConfirmActions
+          onOk={vi.fn()}
+          onCancel={vi.fn()}
+          pressVariant="lift"
+          duration={200}
+          easing={[0.22, 1, 0.36, 1]}
+        />,
+      );
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+
+      await waitFor(() => expect(ok.style.transform).toMatch(/translateY/), { timeout: 100 });
+    });
   });
 });

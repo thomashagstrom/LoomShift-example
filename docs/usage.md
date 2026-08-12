@@ -153,6 +153,9 @@ come from the dialog, so `ConfirmActions` only renders the buttons:
 | `cancelLabel`                 | `string`                          | `'Cancel'` |
 | `emphasis`                    | `'high' \| 'low'`                 | `'high'`   |
 | `align`                       | `'left' \| 'center' \| 'right'`   | `'right'`  |
+| `pressVariant`                | `'scale' \| 'lift' \| 'none'`     | `'scale'`  |
+| `duration`                    | `number` (milliseconds)           | `120`      |
+| `easing`                      | Framer Motion easing              | `'easeInOut'` |
 | `destructive`                 | `boolean`                         | `false`    |
 | `pending`                     | `boolean`                         | —          |
 | `disableConfirm`              | `boolean`                         | `false`    |
@@ -188,6 +191,24 @@ The spinner slot is reserved whenever `pending` is passed, which keeps the butto
 the same width in both states so nothing shifts. On a promise-tracked confirm the
 slot only exists while the promise runs — pass `pending={false}` alongside it to
 reserve the space up front.
+
+Both buttons animate while they are held down, so a press feels answered
+straight away. It works from mouse, touch and the keyboard (Enter and Space
+activate a `<button>`, so they animate too), and it is purely visual: `onOk` and
+`onCancel` fire from the click, never after the animation. Rapid clicks restart
+the press from wherever the last one got to instead of queueing up.
+
+`pressVariant` picks the preset — `'scale'` sinks the button, `'lift'` presses it
+down towards the surface — and `duration`/`easing` tune it like everywhere else
+in the library:
+
+```tsx
+<ConfirmActions pressVariant="lift" duration={200} onOk={save} onCancel={close} />
+```
+
+`pressVariant="none"` or `duration={0}` turns the motion off and leaves MUI's own
+ripple as the feedback, which is also what anyone with
+`prefers-reduced-motion: reduce` gets automatically.
 
 Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 `spacing` work as usual.
