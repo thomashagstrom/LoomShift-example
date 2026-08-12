@@ -1,10 +1,15 @@
+import * as React from 'react';
+import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { AnimatedDialog } from '../AnimatedDialog';
@@ -147,9 +152,64 @@ export const Pending: Story = {
     docs: {
       description: {
         story:
-          'The host owns the async state: set `pending` while your promise is in flight. The confirm button shows a spinner and stops accepting clicks, Cancel stays interactive, and the reserved spinner slot keeps the button the same width in both states so nothing shifts.',
+          'The busy state held open. A host that owns the async state itself can set `pending` while its promise is in flight; returning that promise from `onOk` gets the same thing without the extra state. The confirm button shows a spinner and stops accepting clicks, Cancel stays interactive, and the reserved spinner slot keeps the button the same width in both states so nothing shifts.',
       },
     },
+  },
+};
+
+export const PendingLifecycle: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The whole lifecycle, driven by a real promise: **return it from `onOk`** and',
+          'the button tracks it — busy while it runs, idle again when it settles. Clicks',
+          'that land during the busy state are dropped, so a slow confirm cannot be',
+          'submitted twice. Flip the toggle to make the confirm fail: the button comes',
+          'back to idle rather than staying stuck, and the host renders the error.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: function PendingLifecycleStory(args) {
+    const [shouldFail, setShouldFail] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const [confirms, setConfirms] = React.useState(0);
+
+    const save = () =>
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => (shouldFail ? reject(new Error('Could not save. Try again.')) : resolve()), 1500);
+      });
+
+    return (
+      <Stack spacing={2} sx={{ width: 360 }}>
+        <FormControlLabel
+          control={<Switch checked={shouldFail} onChange={(_, checked) => setShouldFail(checked)} />}
+          label="Make the confirm fail"
+        />
+        <Typography variant="body2" color="text.secondary">
+          onOk fired {confirms} {confirms === 1 ? 'time' : 'times'} — clicking Ok repeatedly while
+          it runs leaves this at one per confirm.
+        </Typography>
+        {error ? <Alert severity="error">{error}</Alert> : null}
+        <Divider />
+        <ConfirmActions
+          {...args}
+          confirmLabel="Save"
+          onOk={() => {
+            setConfirms((count) => count + 1);
+            setError(null);
+            args.onOk();
+            // Handled here, so the button's rethrow has an owner: a failed
+            // confirm shows an error instead of closing the surface.
+            return save().catch((reason: Error) => {
+              setError(reason.message);
+            });
+          }}
+        />
+      </Stack>
+    );
   },
 };
 

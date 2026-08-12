@@ -13,8 +13,12 @@ export type ConfirmActionsAlign = 'left' | 'center' | 'right';
 
 export interface ConfirmActionsProps
   extends Omit<StackProps, 'children' | 'direction' | 'justifyContent'> {
-  /** Fired once per click of the Ok button. */
-  onOk: () => void;
+  /**
+   * Fired once per click of the Ok button. Return the promise of an async
+   * confirm and the button tracks it: it goes busy for as long as the promise
+   * is in flight, and ignores clicks until it settles.
+   */
+  onOk: () => void | PromiseLike<unknown>;
   /** Fired once per click of the Cancel button. */
   onCancel: () => void;
   /** Label of the confirm button. Defaults to `'Ok'`. */
@@ -27,7 +31,10 @@ export interface ConfirmActionsProps
   destructive?: boolean;
   /**
    * Shows a spinner on the confirm button and blocks further clicks while the
-   * host resolves the action. Cancel stays interactive.
+   * host resolves the action. Cancel stays interactive. Only needed when the
+   * host owns the async state itself — an `onOk` that returns a promise drives
+   * the same busy state on its own. The two are additive: whichever says busy
+   * wins.
    */
   pending?: boolean;
   /** Disables the confirm button, e.g. while a form is invalid. */

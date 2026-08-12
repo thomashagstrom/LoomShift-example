@@ -147,7 +147,8 @@ come from the dialog, so `ConfirmActions` only renders the buttons:
 
 | Prop                          | Type                              | Default    |
 | ----------------------------- | --------------------------------- | ---------- |
-| `onOk` / `onCancel`           | `() => void` (required)           | —          |
+| `onOk`                        | `() => void \| PromiseLike<unknown>` (required) | — |
+| `onCancel`                    | `() => void` (required)           | —          |
 | `confirmLabel`                | `string`                          | `'Ok'`     |
 | `cancelLabel`                 | `string`                          | `'Cancel'` |
 | `emphasis`                    | `'high' \| 'low'`                 | `'high'`   |
@@ -158,14 +159,35 @@ come from the dialog, so `ConfirmActions` only renders the buttons:
 | `fullWidth`                   | `boolean`                         | `false`    |
 | `okButtonProps` / `cancelButtonProps` | `ButtonProps`             | —          |
 
-The host owns the async state. Pass `pending` while your promise is in flight:
-the confirm button shows a spinner and stops accepting clicks, Cancel stays
-interactive, and the reserved spinner slot keeps the button the same width in
-both states so nothing shifts.
+**Return the promise from `onOk`** and the confirm button tracks it for you: it
+shows a spinner and stops accepting clicks for as long as the promise is in
+flight, so a slow confirm cannot be submitted twice. Cancel stays interactive
+throughout, unless you disable it yourself through `cancelButtonProps`.
+
+```tsx
+<ConfirmActions confirmLabel="Save" onOk={() => save().then(close)} onCancel={close} />
+```
+
+A rejected promise releases the button back to idle rather than leaving it stuck
+— then rethrows, so a failed confirm is never silent. Catch it inside `onOk` to
+show the error and keep the surface open:
+
+```tsx
+onOk={() => save().catch((error) => setError(error.message))}
+```
+
+Hosts that already track the async state can drive the same busy state with
+`pending` instead. The two are additive, so `pending` never switches the promise
+tracking off:
 
 ```tsx
 <ConfirmActions confirmLabel="Save" pending={saving} onOk={save} onCancel={close} />
 ```
+
+The spinner slot is reserved whenever `pending` is passed, which keeps the button
+the same width in both states so nothing shifts. On a promise-tracked confirm the
+slot only exists while the promise runs — pass `pending={false}` alongside it to
+reserve the space up front.
 
 Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 `spacing` work as usual.
