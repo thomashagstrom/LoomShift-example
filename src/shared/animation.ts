@@ -14,6 +14,15 @@ export type MotionEasing = MotionTransitionConfig['ease'];
 /** Milliseconds — mirrors MUI's convention of expressing durations in ms. */
 export const DEFAULT_DURATION = 250;
 
+/**
+ * Default duration of a press feedback animation, in milliseconds.
+ *
+ * Shorter than {@link DEFAULT_DURATION}: a press animates down on pointer-down
+ * and back up on release, so both halves have to fit inside the ~300ms a tap
+ * still reads as instant.
+ */
+export const DEFAULT_PRESS_DURATION = 120;
+
 /** Default Framer Motion easing curve. */
 export const DEFAULT_EASING: MotionEasing = 'easeInOut';
 

@@ -32,7 +32,9 @@ wording, order and styling every time, instead of each screen hand-rolling its
 own pair. The labels can be changed ("Save"/"Discard", "Delete"/"Cancel"), and
 it shows a spinner while the action is still finishing — during which the "Ok"
 button stops accepting clicks, so a slow confirm can't be submitted twice by an
-impatient user, while "Cancel" stays available.
+impatient user, while "Cancel" stays available. Both buttons also give way
+slightly as they're pressed, by mouse, finger or keyboard, so the choice feels
+answered the instant it's made.
 
 **Use it when:** a screen asks the user to confirm or back out of something and
 you want that choice to look and behave the same everywhere in the product.
@@ -43,7 +45,8 @@ Every component in this library keeps all the accessibility behaviour (screen
 reader support, keyboard focus order) of the standard MUI components it is
 built from.
 
-The animated components — `AnimatedDialog` and `AnimatedSnackbar` — also:
+The animated components — `AnimatedDialog`, `AnimatedSnackbar` and the
+`ConfirmActions` press feedback — also:
 
 - Respect users' "reduce motion" accessibility setting by skipping the
   animation for people who need it.
@@ -51,5 +54,5 @@ The animated components — `AnimatedDialog` and `AnimatedSnackbar` — also:
   motion.
 
 This means adopting an animated component is a safe, low-risk swap — nothing
-about how the component is used or who can use it changes, only how it
-enters and exits the screen.
+about how the component is used or who can use it changes, only how it enters
+and exits the screen and how it answers a press.

@@ -14,6 +14,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { AnimatedDialog } from '../AnimatedDialog';
 import { ConfirmActions } from './ConfirmActions';
+import type { ConfirmActionsPressVariant } from './types';
 
 const meta = {
   title: 'Components/ConfirmActions',
@@ -26,8 +27,9 @@ const meta = {
           'The reusable Ok/Cancel pair any screen can drop in to get consistent',
           'confirm/cancel actions. Ok comes first in both the DOM and the visual order,',
           'so tabbing follows what the user sees, and both are plain MUI `Button`s —',
-          'keyboard-focusable and activated with Enter or Space. It ships as its own',
-          'feature slice with a subpath export.',
+          'keyboard-focusable and activated with Enter or Space. Pressing either one',
+          'plays a Framer Motion press animation, so a confirm feels answered the moment',
+          'it is touched. It ships as its own feature slice with a subpath export.',
           '',
           "```tsx\nimport { ConfirmActions } from 'loomshift-example/confirm-actions';\n```",
         ].join('\n'),
@@ -47,6 +49,16 @@ const meta = {
       options: ['left', 'center', 'right'],
       table: { defaultValue: { summary: "'right'" } },
     },
+    pressVariant: {
+      control: 'inline-radio',
+      options: ['scale', 'lift', 'none'],
+      table: { defaultValue: { summary: "'scale'" } },
+    },
+    duration: {
+      control: { type: 'number', min: 0, step: 20 },
+      table: { defaultValue: { summary: '120' } },
+    },
+    easing: { table: { defaultValue: { summary: "'easeInOut'" } } },
     destructive: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
     pending: { control: 'boolean' },
     disableConfirm: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
@@ -62,6 +74,8 @@ const meta = {
     cancelLabel: 'Cancel',
     emphasis: 'high',
     align: 'right',
+    pressVariant: 'scale',
+    duration: 120,
     destructive: false,
     pending: false,
     disableConfirm: false,
@@ -99,13 +113,67 @@ export const ButtonOrder: Story = {
   ),
 };
 
+/** The presets, in the order they are offered to a reviewer. */
+const PRESS_VARIANTS: { variant: ConfirmActionsPressVariant; note: string }[] = [
+  { variant: 'scale', note: 'The default — the button sinks slightly under the pointer.' },
+  { variant: 'lift', note: 'Presses the button down towards the surface instead.' },
+  { variant: 'none', note: "No motion; MUI's own ripple is the only feedback." },
+];
+
+export const PressAnimation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Press the pairs below — mouse, touch or the keyboard, since Enter and Space',
+          'animate the same way. The animation is visual only: `onOk`/`onCancel` fire',
+          'straight from the click, so nothing waits for it, and hammering a button',
+          'restarts the press from wherever the last one got to rather than sticking.',
+          '',
+          'Default preset: `pressVariant="scale"` at `duration={120}` with the shared',
+          "`'easeInOut'` easing.",
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <Stack spacing={3} sx={{ width: 360 }}>
+      {PRESS_VARIANTS.map(({ variant, note }) => (
+        <Stack key={variant} spacing={0.5}>
+          <Typography variant="subtitle2">pressVariant=&quot;{variant}&quot;</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {note}
+          </Typography>
+          <ConfirmActions {...args} pressVariant={variant} />
+        </Stack>
+      ))}
+    </Stack>
+  ),
+};
+
+export const ReducedMotion: Story = {
+  args: { duration: 0 },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The motion-free path, shown here with `duration={0}` — the same thing anyone',
+          'whose system sets `prefers-reduced-motion: reduce` gets without asking. The',
+          'buttons never move: the ripple and the colour change carry the feedback, and',
+          'the confirm still fires exactly as it does with the animation on.',
+        ].join('\n'),
+      },
+    },
+  },
+};
+
 export const InDialog: Story = {
   args: { confirmLabel: 'Delete', destructive: true },
   parameters: {
     docs: {
       description: {
         story:
-          'The intended primary host. Focus trapping and labelling come from the dialog, not from this component — `ConfirmActions` only renders the two buttons inside `DialogActions`.',
+          "The intended primary host. Focus trapping and labelling come from the dialog, not from this component — `ConfirmActions` only renders the two buttons inside `DialogActions`. It is also the surface to check the press animation on: it plays inside the dialog's own zoom transition without shifting the footer.",
       },
       // The dialog is fixed-positioned, so the docs block gets its own iframe.
       story: { inline: false, height: '260px' },
