@@ -30,7 +30,9 @@ The pair of "Ok" and "Cancel" buttons that ends a confirmation. Any screen can
 drop it in — a dialog, a form footer, an inline panel — and get the same
 wording, order and styling every time, instead of each screen hand-rolling its
 own pair. The labels can be changed ("Save"/"Discard", "Delete"/"Cancel"), and
-it can show a spinner while the action is still finishing.
+it shows a spinner while the action is still finishing — during which the "Ok"
+button stops accepting clicks, so a slow confirm can't be submitted twice by an
+impatient user, while "Cancel" stays available.
 
 **Use it when:** a screen asks the user to confirm or back out of something and
 you want that choice to look and behave the same everywhere in the product.
