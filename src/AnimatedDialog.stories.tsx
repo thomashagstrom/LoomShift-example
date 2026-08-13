@@ -6,6 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useArgs } from 'storybook/preview-api';
 import { AnimatedDialog } from './AnimatedDialog';
+import { ConfirmActions } from './confirm-actions/ConfirmActions';
 
 const meta = {
   title: 'Components/AnimatedDialog',
@@ -19,6 +20,10 @@ const meta = {
           'Framer Motion out of the box. Every MUI `Dialog` prop is forwarded, so',
           'accessibility roles and focus trapping are preserved, and users who set',
           '`prefers-reduced-motion` get an instant, motion-free transition.',
+          '',
+          'Every story below is a real flow: open the dialog from the trigger button and',
+          'the footer is the shared `ConfirmActions` pair, so the press animation, Esc,',
+          'Cancel and the focus handover are all reachable from here.',
           '',
           "```tsx\nimport { AnimatedDialog } from 'loomshift-example';\n```",
         ].join('\n'),
@@ -72,10 +77,14 @@ const meta = {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={close}>Cancel</Button>
-            <Button variant="contained" onClick={close}>
-              Publish
-            </Button>
+            {/* `autoFocus` lands focus on the confirm button as the dialog opens;
+                MUI's focus trap hands it back to the trigger on close. */}
+            <ConfirmActions
+              confirmLabel="Publish"
+              onOk={close}
+              onCancel={close}
+              okButtonProps={{ autoFocus: true }}
+            />
           </DialogActions>
         </AnimatedDialog>
       </>

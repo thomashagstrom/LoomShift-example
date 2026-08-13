@@ -140,10 +140,20 @@ come from the dialog, so `ConfirmActions` only renders the buttons:
     <DialogContentText>This removes the project for every member.</DialogContentText>
   </DialogContent>
   <DialogActions>
-    <ConfirmActions confirmLabel="Delete" destructive onOk={destroy} onCancel={close} />
+    <ConfirmActions
+      confirmLabel="Delete"
+      destructive
+      onOk={destroy}
+      onCancel={close}
+      okButtonProps={{ autoFocus: true }}
+    />
   </DialogActions>
 </AnimatedDialog>
 ```
+
+`autoFocus` on the confirm button is what puts focus on it as the dialog opens;
+handing focus back to the element that opened the dialog is MUI's focus trap, so
+Esc, Cancel and Ok all end up back on the trigger without any extra work.
 
 | Prop                          | Type                              | Default    |
 | ----------------------------- | --------------------------------- | ---------- |
