@@ -216,9 +216,12 @@ in the library:
 <ConfirmActions pressVariant="lift" duration={200} onOk={save} onCancel={close} />
 ```
 
-`pressVariant="none"` or `duration={0}` turns the motion off and leaves MUI's own
-ripple as the feedback, which is also what anyone with
-`prefers-reduced-motion: reduce` gets automatically.
+Anyone with `prefers-reduced-motion: reduce` — or a `duration={0}` — gets the
+press without the motion: the button shades instantly while it is held down and
+returns to its own colour on release, so the press is still acknowledged without
+anything moving. Labels, callbacks and every other behaviour are identical.
+`pressVariant="none"` is the full opt-out, leaving MUI's own ripple as the only
+feedback.
 
 Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 `spacing` work as usual.
