@@ -58,6 +58,17 @@ const PRESS_TARGETS: Record<ConfirmActionsPressVariant, TargetAndTransition | un
 /** Resting target, listing every property a variant touches so all of them return. */
 const PRESS_REST: TargetAndTransition = { scale: 1, y: 0 };
 
+/**
+ * Motion-free stand-in for a press: an instant shade change, so holding a button
+ * down is still acknowledged without anything moving. `filter` shades whatever
+ * colour the button already has, which keeps it theme-agnostic and works the
+ * same on the contained confirm and the text cancel.
+ */
+const PRESS_SHADE: TargetAndTransition = { filter: 'brightness(0.9)' };
+
+/** Resting shade, so a release puts the button back to its own colour. */
+const PRESS_SHADE_REST: TargetAndTransition = { filter: 'brightness(1)' };
+
 /** Keys that activate a native `<button>`, and so have to animate like a press. */
 const PRESS_KEYS = ['Enter', ' '];
 
@@ -135,9 +146,10 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
  * mouse, touch or keyboard alike. It is purely visual: `onOk`/`onCancel` still
  * fire from the click, so nothing ever waits on the animation, and Framer Motion
  * interpolates from wherever the previous press got to, so hammering a button
- * restarts the press instead of leaving it stuck. `pressVariant="none"`,
- * `duration={0}` and `prefers-reduced-motion` each leave MUI's ripple as the
- * only feedback.
+ * restarts the press instead of leaving it stuck. `prefers-reduced-motion` and
+ * `duration={0}` replace the movement with an instant shade change, leaving the
+ * labels, the callbacks and everything else untouched; `pressVariant="none"`
+ * leaves MUI's ripple as the only feedback.
  */
 export const ConfirmActions = React.forwardRef<HTMLDivElement, ConfirmActionsProps>(
   function ConfirmActions(
@@ -208,11 +220,14 @@ export const ConfirmActions = React.forwardRef<HTMLDivElement, ConfirmActionsPro
     // no shift at all on an async confirm can pass `pending={false}`.
     const reserveSpinnerSlot = pending !== undefined || awaitingOk;
 
-    // A zero-length press would snap to the target and back rather than move,
-    // so an opted-out or reduced-motion press drops the animation entirely and
-    // leaves MUI's ripple as the only feedback.
+    // Reduced motion — and a zero-length press, which would snap to the target
+    // and back rather than move — keeps the press feedback but swaps the
+    // movement for an instant shade change. Only `pressVariant="none"` opts out
+    // altogether, leaving MUI's ripple as the only feedback.
+    const motionFree = Boolean(prefersReducedMotion) || duration <= 0;
     const pressTarget =
-      prefersReducedMotion || duration <= 0 ? undefined : PRESS_TARGETS[pressVariant];
+      pressVariant === 'none' ? undefined : motionFree ? PRESS_SHADE : PRESS_TARGETS[pressVariant];
+    const pressRest = motionFree ? PRESS_SHADE_REST : PRESS_REST;
     const pressTransition = buildMotionTransition(duration, easing, prefersReducedMotion);
 
     /**
@@ -221,7 +236,7 @@ export const ConfirmActions = React.forwardRef<HTMLDivElement, ConfirmActionsPro
      */
     const pressProps = (pressed: boolean): Pick<MotionButtonProps, 'animate' | 'transition'> =>
       pressTarget
-        ? { animate: pressed ? pressTarget : PRESS_REST, transition: pressTransition }
+        ? { animate: pressed ? pressTarget : pressRest, transition: pressTransition }
         : {};
 
     return (

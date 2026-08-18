@@ -15,7 +15,8 @@ export type ConfirmActionsAlign = 'left' | 'center' | 'right';
 /**
  * Press feedback played on both buttons while they are held down. `'scale'`
  * sinks the button slightly, `'lift'` presses it down towards the surface, and
- * `'none'` leaves MUI's own ripple as the only feedback.
+ * `'none'` leaves MUI's own ripple as the only feedback. `'scale'` and `'lift'`
+ * both fall back to an instant shade change for users who prefer reduced motion.
  */
 export type ConfirmActionsPressVariant = 'scale' | 'lift' | 'none';
 
@@ -54,11 +55,13 @@ export interface ConfirmActionsProps
   align?: ConfirmActionsAlign;
   /**
    * Press feedback animation played on both buttons. Defaults to `'scale'`;
-   * `'none'` (or `duration={0}`, or a reduced-motion preference) leaves the
-   * ripple as the only feedback.
+   * `'none'` leaves the ripple as the only feedback.
    */
   pressVariant?: ConfirmActionsPressVariant;
-  /** Press animation duration in milliseconds. Defaults to `120`. */
+  /**
+   * Press animation duration in milliseconds. Defaults to `120`. `0` — like a
+   * reduced-motion preference — swaps the movement for an instant shade change.
+   */
   duration?: number;
   /** Framer Motion easing curve for the press. Defaults to `'easeInOut'`. */
   easing?: ConfirmActionsEasing;
