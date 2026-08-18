@@ -226,6 +226,48 @@ feedback.
 Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 `spacing` work as usual.
 
+### `AnimatedStack`
+
+A MUI `Stack` that animates itself in as it mounts, published under its own
+subpath export. It is a layout component first: every `Stack` prop
+(`direction`, `spacing`, `alignItems`, `justifyContent`, `divider`, `sx`, …) is
+forwarded untouched and arbitrary children render as its **direct flex items**,
+so wrapping an existing layout changes when it appears, never how it is
+arranged:
+
+```tsx
+import { AnimatedStack } from 'loomshift-example/stack';
+import { ConfirmActions } from 'loomshift-example/confirm-actions';
+
+function Example({ close }: { close: () => void }) {
+  return (
+    <AnimatedStack direction="column" spacing={2} variant="slide-up">
+      <Typography variant="h6">Delete project?</Typography>
+      <ConfirmActions confirmLabel="Delete" destructive onOk={destroy} onCancel={close} />
+    </AnimatedStack>
+  );
+}
+```
+
+The animation only ever touches `opacity`, `scale` and `y` — never a layout
+property — and the stack adds no width or `overflow` of its own, so the same
+markup fits containers from 320px to 1440px without clipping. Animation is
+configured through the same optional, fully typed props as the rest of the
+library:
+
+| Prop       | Type                                             | Default       |
+| ---------- | ------------------------------------------------ | ------------- |
+| `variant`  | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
+| `duration` | `number` (milliseconds)                          | `250`         |
+| `easing`   | Framer Motion easing                             | `'easeInOut'` |
+
+`'fade'` is the default because it moves nothing, so dropping the component
+around an existing layout cannot shift it. The prop surface is exactly `Stack`'s
+plus these three, so an unknown prop is a TypeScript error.
+
+The animation plays once per mount. Remount the stack — a changing `key` is the
+usual way — to play it again.
+
 ## Customising or disabling the animation
 
 [Framer Motion](https://www.framer.com/motion/) is the only motion source in the

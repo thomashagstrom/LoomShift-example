@@ -19,6 +19,11 @@
       "import": "./dist/snackbar/index.js",
       "require": "./dist/snackbar/index.cjs"
     },
+    "./stack": {
+      "types": "./dist/stack/index.d.ts",
+      "import": "./dist/stack/index.js",
+      "require": "./dist/stack/index.cjs"
+    },
     "./confirm-actions": {
       "types": "./dist/confirm-actions/index.d.ts",
       "import": "./dist/confirm-actions/index.js",

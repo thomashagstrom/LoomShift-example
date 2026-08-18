@@ -39,14 +39,27 @@ answered the instant it's made.
 **Use it when:** a screen asks the user to confirm or back out of something and
 you want that choice to look and behave the same everywhere in the product.
 
+## AnimatedStack
+
+A layout box that arranges whatever you put inside it in a row or a column with
+even gaps between the items — and eases itself onto the screen instead of
+snapping into place. It is the standard MUI stack with nothing taken away, so
+anything can go inside it: cards, form rows, the "Ok"/"Cancel" pair. The
+arrangement is unchanged whether the animation runs or not, so it fits a phone
+and a wide desktop the same way.
+
+**Use it when:** you need a simple row or column of items and want the group to
+appear gracefully — for example a panel whose contents are revealed after
+loading.
+
 ## Shared behaviour
 
 Every component in this library keeps all the accessibility behaviour (screen
 reader support, keyboard focus order) of the standard MUI components it is
 built from.
 
-The animated components — `AnimatedDialog`, `AnimatedSnackbar` and the
-`ConfirmActions` press feedback — also:
+The animated components — `AnimatedDialog`, `AnimatedSnackbar`, `AnimatedStack`
+and the `ConfirmActions` press feedback — also:
 
 - Respect users' "reduce motion" accessibility setting by skipping the
   animation for people who need it.
