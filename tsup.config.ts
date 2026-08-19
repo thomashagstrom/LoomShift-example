@@ -1,7 +1,12 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/snackbar/index.ts', 'src/confirm-actions/index.ts'],
+  entry: [
+    'src/index.ts',
+    'src/snackbar/index.ts',
+    'src/confirm-actions/index.ts',
+    'src/stack/index.ts',
+  ],
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
