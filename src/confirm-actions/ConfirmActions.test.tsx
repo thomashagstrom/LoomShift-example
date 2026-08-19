@@ -52,6 +52,12 @@ const MOUSE_PRESS = { pointerType: 'mouse', button: 0, isPrimary: true };
 const TOUCH_PRESS = { pointerType: 'touch', isPrimary: true };
 
 /**
+ * Properties the browser can animate without reflowing anything around the
+ * button — the only ones a press is allowed to write.
+ */
+const COMPOSITOR_ONLY_PROPS = ['transform', 'transform-origin', 'filter', 'opacity', 'will-change'];
+
+/**
  * How far the button has sunk into its press, read back off the inline
  * transform Framer Motion writes: `0` at rest, growing towards `0.04` at the
  * bottom of the default `'scale'` press.
@@ -364,6 +370,27 @@ describe('ConfirmActions', () => {
       fireEvent.pointerUp(window, MOUSE_PRESS);
 
       await waitFor(() => expect(pressDepth(ok)).toBe(0), { timeout: 300 });
+    });
+
+    it.each([
+      ['scale', { pressVariant: 'scale' } as const],
+      ['lift', { pressVariant: 'lift' } as const],
+    ])('animates %s without touching a layout property', async (_variant, props) => {
+      render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} {...props} />);
+
+      const ok = screen.getByRole('button', { name: 'Ok' });
+      fireEvent.pointerDown(ok, MOUSE_PRESS);
+      await waitFor(() => expect(ok.style.transform).not.toBe(''), { timeout: 100 });
+
+      // jsdom does no layout, so "does not shift surrounding layout" is asserted
+      // at the source instead: a press may only write properties the compositor
+      // handles on its own. A preset that reached for `width`, `margin` or
+      // `padding` would reflow the footer around the button, and shows up here as
+      // the offending property name.
+      const layoutProps = Array.from(ok.style).filter(
+        (name) => !COMPOSITOR_ONLY_PROPS.includes(name),
+      );
+      expect(layoutProps).toEqual([]);
     });
 
     it('accepts a lift press with a custom easing', async () => {
