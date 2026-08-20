@@ -51,6 +51,8 @@ export interface ConfirmActionsProps
   pending?: boolean;
   /** Disables the confirm button, e.g. while a form is invalid. */
   disableConfirm?: boolean;
+  /** Disables the cancel button, independently of `disableConfirm`. */
+  disableCancel?: boolean;
   /** Horizontal placement of the pair. Defaults to `'right'`. */
   align?: ConfirmActionsAlign;
   /**

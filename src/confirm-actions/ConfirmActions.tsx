@@ -162,6 +162,7 @@ export const ConfirmActions = React.forwardRef<HTMLDivElement, ConfirmActionsPro
       destructive = false,
       pending,
       disableConfirm = false,
+      disableCancel = false,
       align = 'right',
       pressVariant = DEFAULT_PRESS_VARIANT,
       duration = DEFAULT_PRESS_DURATION,
@@ -285,6 +286,7 @@ export const ConfirmActions = React.forwardRef<HTMLDivElement, ConfirmActionsPro
           variant="text"
           color="inherit"
           onClick={onCancel}
+          disabled={disableCancel}
           fullWidth={fullWidth}
           {...cancelButtonProps}
         >

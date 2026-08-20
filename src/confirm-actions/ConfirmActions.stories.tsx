@@ -62,6 +62,7 @@ const meta = {
     destructive: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
     pending: { control: 'boolean' },
     disableConfirm: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
+    disableCancel: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
     fullWidth: { control: 'boolean', table: { defaultValue: { summary: 'false' } } },
     onOk: { table: { disable: true } },
     onCancel: { table: { disable: true } },
@@ -79,6 +80,7 @@ const meta = {
     destructive: false,
     pending: false,
     disableConfirm: false,
+    disableCancel: false,
     fullWidth: false,
   },
 } satisfies Meta<typeof ConfirmActions>;

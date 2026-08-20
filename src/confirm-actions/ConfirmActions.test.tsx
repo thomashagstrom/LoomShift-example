@@ -252,6 +252,20 @@ describe('ConfirmActions', () => {
     expect(screen.getByRole('button', { name: 'Cancel' })).toHaveProperty('disabled', false);
   });
 
+  it('disables only the cancel button via disableCancel', () => {
+    render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} disableCancel />);
+
+    expect(screen.getByRole('button', { name: 'Ok' })).toHaveProperty('disabled', false);
+    expect(screen.getByRole('button', { name: 'Cancel' })).toHaveProperty('disabled', true);
+  });
+
+  it('disables Ok and Cancel independently when both are set', () => {
+    render(<ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} disableConfirm disableCancel />);
+
+    expect(screen.getByRole('button', { name: 'Ok' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: 'Cancel' })).toHaveProperty('disabled', true);
+  });
+
   it('forwards extra button props such as type="submit"', () => {
     render(
       <ConfirmActions onOk={vi.fn()} onCancel={vi.fn()} okButtonProps={{ type: 'submit' }} />,
