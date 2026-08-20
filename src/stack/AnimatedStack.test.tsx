@@ -2,6 +2,7 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import Divider from '@mui/material/Divider';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { ConfirmActions } from '../confirm-actions/ConfirmActions';
 import { AnimatedStack } from './AnimatedStack';
 import type { AnimatedStackVariant } from './types';
@@ -171,6 +172,124 @@ describe('AnimatedStack', () => {
     // stack is there before the next paint rather than fading in.
     await nextFrame();
     expect(stackRoot().style.opacity).toBe('1');
+  });
+
+  describe('gradient background', () => {
+    it('paints an animated gradient with no props beyond children', async () => {
+      render(
+        <AnimatedStack data-testid="stack">
+          <span>only</span>
+        </AnimatedStack>,
+      );
+
+      const root = stackRoot();
+      const style = getComputedStyle(root);
+      expect(style.backgroundImage).toMatch(/linear-gradient/);
+      // Room for the sweep to move in — without the overscan the position
+      // animates but nothing visibly changes.
+      expect(style.backgroundSize).toBe('200% 200%');
+
+      // Framer Motion drives the sweep inline, so the position leaves the
+      // resting first frame on its own once the loop starts.
+      await waitFor(() => expect(root.style.backgroundPosition).not.toBe(''), { timeout: 500 });
+    });
+
+    it('builds the gradient from the theme palette', () => {
+      const theme = createTheme({
+        palette: { primary: { main: '#102030' }, secondary: { main: '#405060' } },
+      });
+      render(
+        <ThemeProvider theme={theme}>
+          <AnimatedStack data-testid="stack">
+            <span>only</span>
+          </AnimatedStack>
+        </ThemeProvider>,
+      );
+
+      const { backgroundImage } = getComputedStyle(stackRoot());
+      expect(backgroundImage).toContain('16, 32, 48');
+      expect(backgroundImage).toContain('64, 80, 96');
+    });
+
+    it("paints the theme's own surface under the tints", () => {
+      // The tints are translucent, so the contrast guarantee only holds if they
+      // composite over a surface the component owns rather than the page.
+      const theme = createTheme({ palette: { background: { paper: '#fafbfc' } } });
+      render(
+        <ThemeProvider theme={theme}>
+          <AnimatedStack data-testid="stack">
+            <span>only</span>
+          </AnimatedStack>
+        </ThemeProvider>,
+      );
+
+      expect(getComputedStyle(stackRoot()).backgroundColor).toBe('rgb(250, 251, 252)');
+    });
+
+    it('paints nothing with background="none"', () => {
+      render(
+        <AnimatedStack data-testid="stack" background="none">
+          <span>only</span>
+        </AnimatedStack>,
+      );
+
+      // jsdom reports the CSS initial values rather than an empty string, so
+      // this is "the component set nothing", not "the property is missing".
+      const style = getComputedStyle(stackRoot());
+      expect(style.backgroundImage).toBe('');
+      expect(style.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('holds the gradient still with backgroundDuration={0}', async () => {
+      render(
+        <AnimatedStack data-testid="stack" backgroundDuration={0}>
+          <span>only</span>
+        </AnimatedStack>,
+      );
+
+      const root = stackRoot();
+      await nextFrame();
+      await nextFrame();
+
+      // Still a panel, just not a moving one.
+      expect(getComputedStyle(root).backgroundImage).toMatch(/linear-gradient/);
+      expect(root.style.backgroundPosition).toBe('');
+    });
+
+    it('shifts no layout when the background is turned on or off', () => {
+      const { rerender } = render(
+        <AnimatedStack data-testid="stack" background="none" spacing={2} direction="row">
+          <span>only</span>
+        </AnimatedStack>,
+      );
+      const plain = getComputedStyle(stackRoot());
+      const boxModel = [plain.display, plain.flexDirection, plain.padding, plain.margin];
+
+      rerender(
+        <AnimatedStack data-testid="stack" background="brand" spacing={2} direction="row">
+          <span>only</span>
+        </AnimatedStack>,
+      );
+      const painted = getComputedStyle(stackRoot());
+
+      // The gradient is paint only: everything that could move a child is
+      // identical with it on and off.
+      expect([painted.display, painted.flexDirection, painted.padding, painted.margin]).toEqual(
+        boxModel,
+      );
+    });
+
+    it('lets a caller sx override the gradient', () => {
+      render(
+        <AnimatedStack data-testid="stack" sx={{ backgroundImage: 'none', maxWidth: 320 }}>
+          <span>only</span>
+        </AnimatedStack>,
+      );
+
+      const style = getComputedStyle(stackRoot());
+      expect(style.backgroundImage).toBe('none');
+      expect(style.maxWidth).toBe('320px');
+    });
   });
 
   it('rejects unknown props at the type level', () => {

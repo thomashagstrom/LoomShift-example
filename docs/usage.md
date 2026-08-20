@@ -255,18 +255,56 @@ markup fits containers from 320px to 1440px without clipping. Animation is
 configured through the same optional, fully typed props as the rest of the
 library:
 
-| Prop       | Type                                             | Default       |
-| ---------- | ------------------------------------------------ | ------------- |
-| `variant`  | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
-| `duration` | `number` (milliseconds)                          | `250`         |
-| `easing`   | Framer Motion easing                             | `'easeInOut'` |
+| Prop                 | Type                                             | Default       |
+| -------------------- | ------------------------------------------------ | ------------- |
+| `variant`            | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
+| `duration`           | `number` (milliseconds)                          | `250`         |
+| `easing`             | Framer Motion easing                             | `'easeInOut'` |
+| `background`         | `'subtle' \| 'brand' \| 'none'`                  | `'subtle'`    |
+| `backgroundDuration` | `number` (milliseconds)                          | `8000`        |
 
 `'fade'` is the default because it moves nothing, so dropping the component
 around an existing layout cannot shift it. The prop surface is exactly `Stack`'s
-plus these three, so an unknown prop is a TypeScript error.
+plus these five, so an unknown prop is a TypeScript error.
 
-The animation plays once per mount. Remount the stack — a changing `key` is the
-usual way — to play it again.
+The enter animation plays once per mount. Remount the stack — a changing `key`
+is the usual way — to play it again.
+
+#### The gradient background
+
+`background` is on by default, so a stack with nothing but children already
+reads as a finished panel:
+
+```tsx
+<AnimatedStack spacing={2} sx={{ p: 2 }}>
+  <Typography variant="h6">Storage</Typography>
+  <Typography variant="body2">4.2 GB of 10 GB used.</Typography>
+</AnimatedStack>
+```
+
+The gradient is built from the theme's own palette — `primary.main` and
+`secondary.main` as low-alpha tints over an opaque `background.paper` — so it
+follows a custom theme instead of hard-coding a colour. It sweeps slowly for as
+long as the stack is mounted and returns to the frame it started on, so the
+loop has no visible seam.
+
+Two things it deliberately does not do:
+
+- **Move anything.** It sets `background-*` only, never a box model property, so
+  turning it on cannot shift a layout. Padding, if you want the panel to breathe,
+  stays yours to add through `sx`.
+- **Make content harder to read.** The tints are low enough that `text.primary`
+  and `text.secondary` stay above the WCAG AA 4.5:1 ratio on every colour the
+  sweep passes through, in both palette modes.
+  `src/stack/gradient.contrast.test.ts` asserts that rather than leaving it to
+  the eye.
+
+`background="none"` is the full opt-out. `prefers-reduced-motion` — and
+`backgroundDuration={0}` — stop the sweep but keep the surface: a looping
+background is the kind of ambient motion the preference is about, while dropping
+the panel entirely would change how the component looks rather than how it
+moves. Your own `sx` composes on top of the gradient and wins, so
+`sx={{ backgroundImage: 'none' }}` or a plain `bgcolor` overrides it.
 
 ## Customising or disabling the animation
 
