@@ -48,6 +48,11 @@ anything can go inside it: cards, form rows, the "Ok"/"Cancel" pair. The
 arrangement is unchanged whether the animation runs or not, so it fits a phone
 and a wide desktop the same way.
 
+Out of the box it also paints a slowly drifting gradient behind its contents,
+picked up from the project's own colours, so a panel looks finished without
+anyone choosing a background. The tint is kept light enough that text on top of
+it stays comfortably readable, and it can be turned off in one prop.
+
 **Use it when:** you need a simple row or column of items and want the group to
 appear gracefully — for example a panel whose contents are revealed after
 loading.

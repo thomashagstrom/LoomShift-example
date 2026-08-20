@@ -8,6 +8,13 @@ import type { MotionEasing } from '../shared/animation';
  */
 export type AnimatedStackVariant = 'fade' | 'grow' | 'slide-up' | 'slide-down';
 
+/**
+ * Built-in animated gradient backgrounds, looping for as long as the stack is
+ * mounted. `background` defaults to `'subtle'`, so a stack with nothing but
+ * children already looks like a panel; `'none'` is the opt-out.
+ */
+export type AnimatedStackBackground = 'subtle' | 'brand' | 'none';
+
 /** Easing accepted by Framer Motion (named curve, cubic-bezier array, …). */
 export type AnimatedStackEasing = MotionEasing;
 
@@ -23,4 +30,8 @@ export interface AnimatedStackProps extends StackProps {
   duration?: number;
   /** Framer Motion easing curve. Defaults to the shared `'easeInOut'`. */
   easing?: AnimatedStackEasing;
+  /** Animated gradient background preset. Defaults to `'subtle'`. */
+  background?: AnimatedStackBackground;
+  /** Duration of one full gradient sweep, in milliseconds. Defaults to `8000`. */
+  backgroundDuration?: number;
 }

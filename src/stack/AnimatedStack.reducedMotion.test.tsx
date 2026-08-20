@@ -60,4 +60,25 @@ describe('AnimatedStack with prefers-reduced-motion', () => {
       'second',
     ]);
   });
+
+  it('keeps the gradient but never sweeps it', async () => {
+    mockReducedMotion(true);
+    const { AnimatedStack } = await import('./AnimatedStack');
+
+    render(
+      <AnimatedStack data-testid="stack">
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const root = screen.getByTestId('stack');
+    await nextFrame();
+    await nextFrame();
+
+    // A looping background is exactly the kind of ambient motion the preference
+    // is about, so the sweep goes — but the panel it decorates stays, held at
+    // its resting frame with nothing animating it.
+    expect(getComputedStyle(root).backgroundImage).toMatch(/linear-gradient/);
+    expect(root.style.backgroundPosition).toBe('');
+  });
 });
