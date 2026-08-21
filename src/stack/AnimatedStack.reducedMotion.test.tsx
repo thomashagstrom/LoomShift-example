@@ -60,4 +60,27 @@ describe('AnimatedStack with prefers-reduced-motion', () => {
       'second',
     ]);
   });
+
+  it('keeps the gradient background but holds it still', async () => {
+    mockReducedMotion(true);
+    const { AnimatedStack } = await import('./AnimatedStack');
+
+    render(
+      <AnimatedStack data-testid="stack" gradientDuration={100}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const root = screen.getByTestId('stack');
+    await nextFrame();
+
+    // The surface still looks designed — it just does not drift, so the
+    // background is one steady frame rather than a removed feature.
+    expect(getComputedStyle(root).backgroundImage).toMatch(/^linear-gradient\(/);
+    const position = root.style.backgroundPosition;
+    expect(position).toBe('0% 50%');
+
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(root.style.backgroundPosition).toBe(position);
+  });
 });

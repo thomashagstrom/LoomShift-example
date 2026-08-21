@@ -1,9 +1,17 @@
 import * as React from 'react';
 import Stack from '@mui/material/Stack';
 import type { StackProps } from '@mui/material/Stack';
+import { useTheme } from '@mui/material/styles';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { MotionProps, Variants } from 'framer-motion';
+import type { MotionProps, Transition, Variants } from 'framer-motion';
 import { DEFAULT_DURATION, DEFAULT_EASING, buildMotionTransition } from '../shared/animation';
+import {
+  DEFAULT_GRADIENT,
+  DEFAULT_GRADIENT_DURATION,
+  GRADIENT_KEYFRAMES,
+  buildGradientTransition,
+  gradientBackgroundStyle,
+} from './gradient';
 import type { AnimatedStackProps, AnimatedStackVariant } from './types';
 
 /**
@@ -63,6 +71,13 @@ const MotionStack = motion.create(Stack) as React.ComponentType<MotionStackProps
  * rest of the library: `variant` picks it, `duration` and `easing` tune it.
  * `prefers-reduced-motion` — and `duration={0}` — collapse it to an instant
  * appearance, leaving the layout and the children untouched.
+ *
+ * It also paints itself a slowly drifting gradient background, on by default and
+ * built from the theme's own palette, so a panel looks finished with nothing but
+ * children passed in. Only `background-position` animates — the offset of an
+ * image twice the element's size — so the gradient can no more disturb the
+ * layout than the enter animation can. `gradient="none"` opts out, and reduced
+ * motion holds the same gradient still rather than removing it.
  */
 export const AnimatedStack = React.forwardRef<HTMLDivElement, AnimatedStackProps>(
   function AnimatedStack(
@@ -70,20 +85,59 @@ export const AnimatedStack = React.forwardRef<HTMLDivElement, AnimatedStackProps
       variant = DEFAULT_VARIANT,
       duration = DEFAULT_DURATION,
       easing = DEFAULT_EASING,
+      gradient = DEFAULT_GRADIENT,
+      gradientDuration = DEFAULT_GRADIENT_DURATION,
+      sx,
       ...stackProps
     },
     ref,
   ) {
+    const theme = useTheme();
     const prefersReducedMotion = useReducedMotion();
+
+    const background = React.useMemo(
+      () => gradientBackgroundStyle(theme, gradient),
+      [theme, gradient],
+    );
+
+    // Reduced motion keeps the gradient and drops the drift: the surface still
+    // looks designed, it just holds one frame. A zero-length loop means the same
+    // thing, matching what `duration={0}` does to the enter animation.
+    const drifting = Boolean(background) && !prefersReducedMotion && gradientDuration > 0;
+
+    // Memoised so a re-render hands Framer Motion the same keyframes it is
+    // already running, rather than restarting the loop from the top.
+    const variants = React.useMemo<Variants>(() => {
+      const enter = ENTER_VARIANTS[variant] ?? ENTER_VARIANTS[DEFAULT_VARIANT];
+      if (!background) return enter;
+      return {
+        hidden: { ...enter.hidden, backgroundPosition: GRADIENT_KEYFRAMES[0] },
+        visible: {
+          ...enter.visible,
+          backgroundPosition: drifting ? GRADIENT_KEYFRAMES : GRADIENT_KEYFRAMES[0],
+        },
+      };
+    }, [variant, background, drifting]);
+
+    // The loop is given its own per-value transition so it runs on its own clock:
+    // the enter animation still lasts `duration`, and neither one waits for the
+    // other.
+    const transition: Transition = {
+      ...buildMotionTransition(duration, easing, prefersReducedMotion),
+      ...(drifting ? { backgroundPosition: buildGradientTransition(gradientDuration) } : null),
+    };
 
     return (
       <MotionStack
         ref={ref}
         initial="hidden"
         animate="visible"
-        variants={ENTER_VARIANTS[variant] ?? ENTER_VARIANTS[DEFAULT_VARIANT]}
-        transition={buildMotionTransition(duration, easing, prefersReducedMotion)}
+        variants={variants}
+        transition={transition}
         {...stackProps}
+        // Array form so a caller's own `sx` composes with the gradient — and can
+        // override it — instead of replacing it wholesale.
+        sx={[background ?? false, ...(Array.isArray(sx) ? sx : [sx])]}
       />
     );
   },

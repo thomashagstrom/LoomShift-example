@@ -3,4 +3,5 @@ export type {
   AnimatedStackProps,
   AnimatedStackVariant,
   AnimatedStackEasing,
+  AnimatedStackGradient,
 } from './types';

@@ -11,16 +11,23 @@ import { ConfirmActions } from '../confirm-actions/ConfirmActions';
 import { AnimatedStack } from './AnimatedStack';
 import type { AnimatedStackVariant } from './types';
 
-/** Placeholder content, so the stories show the layout rather than a design. */
-function Card({ children }: { children: React.ReactNode }) {
+/**
+ * Placeholder content, so the stories show the layout rather than a design.
+ * `transparent` drops the card's own surface, which is how the gradient stories
+ * let the background through instead of covering it up.
+ */
+function Card({ children, transparent = false }: { children: React.ReactNode; transparent?: boolean }) {
   return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
+    <Paper variant="outlined" sx={{ p: 1.5, ...(transparent && { bgcolor: 'transparent' }) }}>
       <Typography variant="body2">{children}</Typography>
     </Paper>
   );
 }
 
 const CARDS = ['One', 'Two', 'Three'];
+
+/** Room around the children so the gradient is visible, not just glimpsed. */
+const PANEL_SX = { width: 360, p: 2, borderRadius: 1 } as const;
 
 const meta = {
   title: 'Components/AnimatedStack',
