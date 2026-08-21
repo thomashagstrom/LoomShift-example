@@ -48,6 +48,12 @@ anything can go inside it: cards, form rows, the "Ok"/"Cancel" pair. The
 arrangement is unchanged whether the animation runs or not, so it fits a phone
 and a wide desktop the same way.
 
+It also gives itself a background out of the box: a very faint colour wash,
+taken from the product's own theme, that drifts slowly and never stops. It is
+deliberately subtle — enough to make a panel look finished with no design work
+at all, and far too light to make any text on it harder to read. It can be
+turned off for stacks that should stay see-through.
+
 **Use it when:** you need a simple row or column of items and want the group to
 appear gracefully — for example a panel whose contents are revealed after
 loading.

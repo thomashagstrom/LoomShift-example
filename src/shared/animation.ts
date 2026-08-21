@@ -23,6 +23,16 @@ export const DEFAULT_DURATION = 250;
  */
 export const DEFAULT_PRESS_DURATION = 120;
 
+/**
+ * Default duration of one full ambient loop, in milliseconds.
+ *
+ * Two orders of magnitude longer than {@link DEFAULT_DURATION}: an enter
+ * animation is over before the eye can track it, while an ambient loop runs for
+ * as long as the component is mounted and has to stay below the threshold of
+ * being noticed at all.
+ */
+export const DEFAULT_AMBIENT_DURATION = 12000;
+
 /** Default Framer Motion easing curve. */
 export const DEFAULT_EASING: MotionEasing = 'easeInOut';
 

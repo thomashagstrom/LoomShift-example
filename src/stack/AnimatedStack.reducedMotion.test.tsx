@@ -60,4 +60,27 @@ describe('AnimatedStack with prefers-reduced-motion', () => {
       'second',
     ]);
   });
+
+  it('keeps the gradient surface but never pans it', async () => {
+    mockReducedMotion(true);
+    const { AnimatedStack } = await import('./AnimatedStack');
+    const { GRADIENT_REST } = await import('./gradient');
+
+    render(
+      <AnimatedStack data-testid="stack">
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const root = screen.getByTestId('stack');
+    await nextFrame();
+    await nextFrame();
+
+    // The surface is colour rather than movement, so it stays — a stack that
+    // lost its background under `prefers-reduced-motion` would look broken
+    // rather than calm. It simply rests on the frame the pan starts from.
+    expect(getComputedStyle(root).backgroundImage).toContain('linear-gradient');
+    expect(getComputedStyle(root).backgroundPosition).toBe(GRADIENT_REST);
+    expect(root.style.backgroundPosition).toBe('');
+  });
 });
