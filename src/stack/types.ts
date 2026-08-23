@@ -33,4 +33,22 @@ export interface AnimatedStackProps extends StackProps {
   duration?: number;
   /** Framer Motion easing curve. Defaults to the shared `'easeInOut'`. */
   easing?: AnimatedStackEasing;
+  /**
+   * Brand colours to tint the gradient with instead of the theme's
+   * `primary`/`secondary`. Needs 2 or more valid CSS colours; too few, or one
+   * that fails to parse, falls back to the theme pair rather than rendering a
+   * broken background. Ignored when `background="none"`.
+   */
+  gradientColors?: string[];
+  /**
+   * Angle or direction the gradient sweeps along, in `linear-gradient` syntax
+   * (e.g. `'45deg'`, `'to right'`). Defaults to the built-in shallow diagonal.
+   */
+  gradientAngle?: string;
+  /**
+   * How long one full ambient gradient pan takes, in milliseconds. Defaults to
+   * the shared ambient duration. Distinct from `duration`, which times the
+   * one-shot enter animation.
+   */
+  gradientDuration?: number;
 }

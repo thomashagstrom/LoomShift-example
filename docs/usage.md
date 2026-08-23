@@ -255,16 +255,19 @@ markup fits containers from 320px to 1440px without clipping. Animation is
 configured through the same optional, fully typed props as the rest of the
 library:
 
-| Prop         | Type                                             | Default       |
-| ------------ | ------------------------------------------------ | ------------- |
-| `variant`    | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
-| `background` | `'gradient' \| 'none'`                           | `'gradient'`  |
-| `duration`   | `number` (milliseconds)                          | `250`         |
-| `easing`     | Framer Motion easing                             | `'easeInOut'` |
+| Prop               | Type                                             | Default       |
+| ------------------ | ------------------------------------------------ | ------------- |
+| `variant`          | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
+| `background`       | `'gradient' \| 'none'`                           | `'gradient'`  |
+| `duration`         | `number` (milliseconds)                          | `250`         |
+| `easing`           | Framer Motion easing                             | `'easeInOut'` |
+| `gradientColors`   | `string[]` (2+ CSS colours)                      | theme colours |
+| `gradientAngle`    | `string` (`linear-gradient` angle/direction)     | `'120deg'`    |
+| `gradientDuration` | `number` (milliseconds)                          | `12000`       |
 
 `'fade'` is the default because it moves nothing, so dropping the component
 around an existing layout cannot shift it. The prop surface is exactly `Stack`'s
-plus these four, so an unknown prop is a TypeScript error.
+plus these seven, so an unknown prop is a TypeScript error.
 
 The animation plays once per mount. Remount the stack — a changing `key` is the
 usual way — to play it again.
@@ -297,6 +300,22 @@ transparent stack, with nothing painted behind the children:
 Reduced motion — and `duration={0}` — stops the pan but keeps the surface: the
 gradient is colour rather than movement, so it rests on one frame instead of
 disappearing.
+
+`gradientColors`, `gradientAngle` and `gradientDuration` override the gradient
+without touching the enter animation, so a panel can match a feature's
+branding:
+
+```tsx
+<AnimatedStack gradientColors={['#4F46E5', '#EC4899']}>{children}</AnimatedStack>
+```
+
+Each is independently optional — an unset one falls back to its theme default —
+and `gradientColors` still needs 2 or more colours the browser can parse; too
+few, or one it can't parse, falls back to the theme pair rather than rendering
+a broken background. Override colours are tinted to the same 8% as the theme
+default, but the WCAG AA contrast guarantee is only proven for the theme
+palette: pick brand colours with enough contrast against `background.paper`
+that text on top of them stays legible.
 
 ## Customising or disabling the animation
 

@@ -4,7 +4,8 @@ import type { StackProps } from '@mui/material/Stack';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { MotionProps, TargetAndTransition } from 'framer-motion';
 import { DEFAULT_DURATION, DEFAULT_EASING, buildMotionTransition } from '../shared/animation';
-import { GRADIENT_KEYFRAMES, GRADIENT_TRANSITION, buildGradientSx } from './gradient';
+import type { Theme } from '@mui/material/styles';
+import { GRADIENT_KEYFRAMES, buildGradientSx, buildGradientTransition } from './gradient';
 import type { AnimatedStackBackground, AnimatedStackProps, AnimatedStackVariant } from './types';
 
 /** The two targets one enter preset animates between. */
@@ -84,6 +85,9 @@ export const AnimatedStack = React.forwardRef<HTMLDivElement, AnimatedStackProps
       background = DEFAULT_BACKGROUND,
       duration = DEFAULT_DURATION,
       easing = DEFAULT_EASING,
+      gradientColors,
+      gradientAngle,
+      gradientDuration,
       ...stackProps
     },
     ref,
@@ -117,14 +121,20 @@ export const AnimatedStack = React.forwardRef<HTMLDivElement, AnimatedStackProps
         }
         transition={
           panGradient
-            ? { ...enterTransition, backgroundPosition: GRADIENT_TRANSITION }
+            ? {
+                ...enterTransition,
+                backgroundPosition: buildGradientTransition(gradientDuration),
+              }
             : enterTransition
         }
         {...stackProps}
         // Array form so a caller's own `sx` composes with the surface — and
         // wins over it — instead of replacing it.
         sx={[
-          background === 'gradient' ? buildGradientSx : false,
+          background === 'gradient'
+            ? (theme: Theme) =>
+                buildGradientSx(theme, { colors: gradientColors, angle: gradientAngle })
+            : false,
           ...(Array.isArray(stackProps.sx) ? stackProps.sx : [stackProps.sx]),
         ]}
       />

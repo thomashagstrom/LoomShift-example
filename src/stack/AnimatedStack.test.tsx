@@ -238,6 +238,82 @@ describe('AnimatedStack', () => {
     expect(root.style.backgroundPosition).toBe('');
   });
 
+  it('overrides the gradient colours', () => {
+    render(
+      <AnimatedStack data-testid="stack" gradientColors={['rgb(1, 2, 3)', 'rgb(4, 5, 6)']}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const backgroundImage = getComputedStyle(stackRoot()).backgroundImage;
+    expect(backgroundImage).toContain('1, 2, 3');
+    expect(backgroundImage).toContain('4, 5, 6');
+  });
+
+  it('overrides the gradient angle', () => {
+    render(
+      <AnimatedStack data-testid="stack" gradientAngle="45deg">
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    expect(getComputedStyle(stackRoot()).backgroundImage).toContain('45deg');
+  });
+
+  it('falls back to the theme gradient with too few override colours', () => {
+    render(
+      <AnimatedStack data-testid="stack" gradientColors={['rgb(1, 2, 3)']}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    expect(getComputedStyle(stackRoot()).backgroundImage).not.toContain('1, 2, 3');
+  });
+
+  it('falls back to the theme gradient with an unparsable override colour', () => {
+    render(
+      <AnimatedStack data-testid="stack" gradientColors={['not-a-color', 'rgb(4, 5, 6)']}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const backgroundImage = getComputedStyle(stackRoot()).backgroundImage;
+    expect(backgroundImage).toContain('linear-gradient');
+    expect(backgroundImage).not.toContain('4, 5, 6');
+  });
+
+  it('falls back to the theme gradient with an empty override array', () => {
+    render(
+      <AnimatedStack data-testid="stack" gradientColors={[]}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    expect(getComputedStyle(stackRoot()).backgroundImage).toContain('linear-gradient');
+  });
+
+  it('changes the rendered gradient on a prop update without remounting', () => {
+    const { rerender } = render(
+      <AnimatedStack data-testid="stack" gradientColors={['rgb(1, 2, 3)', 'rgb(4, 5, 6)']}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const root = stackRoot();
+    expect(getComputedStyle(root).backgroundImage).toContain('1, 2, 3');
+
+    rerender(
+      <AnimatedStack data-testid="stack" gradientColors={['rgb(7, 8, 9)', 'rgb(10, 11, 12)']}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    // Same element — the update changed the gradient in place, not by remounting.
+    expect(stackRoot()).toBe(root);
+    expect(getComputedStyle(root).backgroundImage).toContain('7, 8, 9');
+    expect(getComputedStyle(root).backgroundImage).not.toContain('1, 2, 3');
+  });
+
   it('rejects unknown props at the type level', () => {
     render(
       <AnimatedStack

@@ -24,6 +24,9 @@ export const GRADIENT_TINT_OPACITY = 0.08;
 /** A shallow diagonal, so the pan travels the long edge of a panel. */
 const GRADIENT_ANGLE = '120deg';
 
+/** Fewest colours a `gradientColors` override needs for the sweep to have two ends. */
+const MIN_GRADIENT_COLORS = 2;
+
 /**
  * How far the gradient is scaled past the element. The pan moves the visible
  * window across that overflow, so the sweep never runs out of gradient.
@@ -55,16 +58,51 @@ export const GRADIENT_TRANSITION = {
 };
 
 /**
- * The gradient's colour stops, tinted from the theme palette.
- *
- * First and last stop are the same tint, which is what lets the sweep run both
- * ways without either end looking like a different surface.
+ * Tint one override colour the way the default palette stops are tinted.
+ * `alpha` throws on a string it cannot parse as a colour, which is exactly the
+ * signal an invalid override needs to give — caught by {@link buildGradientStops}
+ * and treated the same as a missing one.
  */
-export function buildGradientStops(theme: Theme): string[] {
+function tryTint(color: string): string | null {
+  try {
+    return alpha(color, GRADIENT_TINT_OPACITY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The gradient's colour stops, tinted from the theme palette by default.
+ *
+ * `colors` lets a caller override which colours get tinted — brand colours
+ * instead of the theme's `primary`/`secondary` — but only once there are enough
+ * of them to sweep between and every one of them parses as a colour. Anything
+ * short of that (too few colours, an unparsable one) falls back to the theme
+ * pair rather than rendering a broken background.
+ *
+ * First and last stop are always the same tint, which is what lets the sweep
+ * run both ways without either end looking like a different surface.
+ */
+export function buildGradientStops(theme: Theme, colors?: string[]): string[] {
+  if (colors && colors.length >= MIN_GRADIENT_COLORS) {
+    const tinted = colors.map(tryTint);
+    if (tinted.every((stop): stop is string => stop !== null)) {
+      return [...tinted, tinted[0]];
+    }
+  }
+
   const { primary, secondary } = theme.palette;
   return [primary.main, secondary.main, primary.main].map((color) =>
     alpha(color, GRADIENT_TINT_OPACITY),
   );
+}
+
+/** Overrides {@link buildGradientSx} accepts in place of the theme default. */
+export interface GradientOverrides {
+  /** Brand colours to tint instead of the theme's `primary`/`secondary` (2+ needed). */
+  colors?: string[];
+  /** Angle or direction to sweep along, in `linear-gradient` syntax (e.g. `'45deg'`). */
+  angle?: string;
 }
 
 /**
@@ -75,11 +113,25 @@ export function buildGradientStops(theme: Theme): string[] {
  * onto whatever is behind the stack, so what the children sit on is known —
  * paper plus 8% of a palette colour — and its contrast can be reasoned about.
  */
-export function buildGradientSx(theme: Theme): CSSObject {
+export function buildGradientSx(theme: Theme, overrides?: GradientOverrides): CSSObject {
   return {
     backgroundColor: theme.palette.background.paper,
-    backgroundImage: `linear-gradient(${GRADIENT_ANGLE}, ${buildGradientStops(theme).join(', ')})`,
+    backgroundImage: `linear-gradient(${overrides?.angle ?? GRADIENT_ANGLE}, ${buildGradientStops(theme, overrides?.colors).join(', ')})`,
     backgroundSize: GRADIENT_SIZE,
     backgroundPosition: GRADIENT_REST,
   };
+}
+
+/**
+ * Timing of one full there-and-back sweep, honouring a caller's override.
+ *
+ * Kept separate from the static {@link GRADIENT_TRANSITION} rather than folding
+ * the override into it, so a component with no override still gets the same
+ * object identity Framer Motion has always seen.
+ */
+export function buildGradientTransition(durationMs?: number): typeof GRADIENT_TRANSITION {
+  if (durationMs === undefined) {
+    return GRADIENT_TRANSITION;
+  }
+  return { ...GRADIENT_TRANSITION, duration: durationMs / 1000 };
 }

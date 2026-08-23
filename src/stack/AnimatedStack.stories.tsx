@@ -62,6 +62,12 @@ const meta = {
     easing: { table: { defaultValue: { summary: "'easeInOut'" } } },
     direction: { control: 'inline-radio', options: ['column', 'row'] },
     spacing: { control: { type: 'number', min: 0, step: 0.5 } },
+    gradientColors: { control: 'object', table: { defaultValue: { summary: 'theme colours' } } },
+    gradientAngle: { control: 'text', table: { defaultValue: { summary: "'120deg'" } } },
+    gradientDuration: {
+      control: { type: 'number', min: 0, step: 500 },
+      table: { defaultValue: { summary: '12000' } },
+    },
   },
   args: {
     variant: 'fade',
@@ -255,6 +261,86 @@ export const WithConfirmActions: Story = {
       <Divider />
       <ConfirmActions confirmLabel="Delete" destructive onOk={fn()} onCancel={fn()} />
     </AnimatedStack>
+  ),
+};
+
+export const CustomGradient: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          '`gradientColors` overrides the theme\'s `primary`/`secondary` pair with brand',
+          'colours, tinted and swept the same way the default gradient is. The Controls',
+          'panel exposes it directly, so a reviewer can try their own pair against the',
+          'default shown alongside it.',
+        ].join('\n'),
+      },
+    },
+  },
+  args: { gradientColors: ['#4F46E5', '#EC4899'] },
+  render: (args) => (
+    <Stack spacing={3} sx={{ width: 360 }}>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">Default gradient</Typography>
+        <AnimatedStack variant={args.variant} duration={args.duration} spacing={args.spacing}>
+          {CARDS.map((card) => (
+            <Card key={card}>{card}</Card>
+          ))}
+        </AnimatedStack>
+      </Stack>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">gradientColors=[&quot;#4F46E5&quot;, &quot;#EC4899&quot;]</Typography>
+        <AnimatedStack {...args}>
+          {CARDS.map((card) => (
+            <Card key={card}>{card}</Card>
+          ))}
+        </AnimatedStack>
+      </Stack>
+    </Stack>
+  ),
+};
+
+/** The gradient override's edge cases, one panel per case. */
+export const GradientEdgeCases: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A single colour has no second stop to sweep towards, so it reads as a flat',
+          'tint rather than a moving gradient. An invalid or omitted colour falls back',
+          'to the theme pair instead of a broken background. `background="none"` drops',
+          'the surface entirely, so `gradientColors` has nothing left to paint.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: (args) => (
+    <Stack spacing={3} sx={{ width: 360 }}>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">Single colour (flat tint, no sweep)</Typography>
+        <AnimatedStack {...args} gradientColors={['#4F46E5']}>
+          {CARDS.map((card) => (
+            <Card key={card}>{card}</Card>
+          ))}
+        </AnimatedStack>
+      </Stack>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">Invalid colour (falls back to theme)</Typography>
+        <AnimatedStack {...args} gradientColors={['not-a-color', '#EC4899']}>
+          {CARDS.map((card) => (
+            <Card key={card}>{card}</Card>
+          ))}
+        </AnimatedStack>
+      </Stack>
+      <Stack spacing={0.5}>
+        <Typography variant="subtitle2">background=&quot;none&quot; (prop has no effect)</Typography>
+        <AnimatedStack {...args} background="none" gradientColors={['#4F46E5', '#EC4899']}>
+          {CARDS.map((card) => (
+            <Card key={card}>{card}</Card>
+          ))}
+        </AnimatedStack>
+      </Stack>
+    </Stack>
   ),
 };
 
