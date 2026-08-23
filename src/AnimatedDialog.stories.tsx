@@ -7,6 +7,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useArgs } from 'storybook/preview-api';
 import { AnimatedDialog } from './AnimatedDialog';
 import { ConfirmActions } from './confirm-actions/ConfirmActions';
+import { AnimatedStack } from './stack/AnimatedStack';
 
 const meta = {
   title: 'Components/AnimatedDialog',
@@ -136,5 +137,53 @@ export const NoAnimation: Story = {
           'Set `duration={0}` to disable the animation and get an instant transition — the same behaviour users with `prefers-reduced-motion` see automatically.',
       },
     },
+  },
+};
+
+export const WithAnimatedStack: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Nest an `AnimatedStack` as the dialog’s container and the title, body and',
+          '`ConfirmActions` become its direct flex items: one column, even spacing and the',
+          'ambient gradient surface behind all three, for free. Nothing about the dialog',
+          'changes — labelling, focus trapping and `open` all still come from',
+          '`AnimatedDialog` — so `duration={0}` and `prefers-reduced-motion` collapse both',
+          'the dialog transition and the stack’s enter animation, leaving the gradient as a',
+          'static wash.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: function Render(args) {
+    const [, updateArgs] = useArgs();
+    const close = () => updateArgs({ open: false });
+
+    return (
+      <>
+        <Button variant="contained" onClick={() => updateArgs({ open: true })}>
+          Open dialog
+        </Button>
+        <AnimatedDialog {...args} onClose={close}>
+          <AnimatedStack direction="column" spacing={1}>
+            <DialogTitle>Publish release?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This pushes the current build to production. You can roll back afterwards.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <ConfirmActions
+                confirmLabel="Publish"
+                onOk={close}
+                onCancel={close}
+                okButtonProps={{ autoFocus: true }}
+              />
+            </DialogActions>
+          </AnimatedStack>
+        </AnimatedDialog>
+      </>
+    );
   },
 };

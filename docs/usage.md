@@ -73,6 +73,35 @@ defaults:
 </AnimatedDialog>
 ```
 
+#### With `AnimatedStack` as the container
+
+Nest an [`AnimatedStack`](#animatedstack) as the dialog's only child and the
+title, body and actions become its direct flex items — one column, even spacing
+and the ambient gradient surface behind all three, with no styling of your own:
+
+```tsx
+import { AnimatedDialog } from 'loomshift-example';
+import { AnimatedStack } from 'loomshift-example/stack';
+import { ConfirmActions } from 'loomshift-example/confirm-actions';
+
+<AnimatedDialog open={open} onClose={close} aria-labelledby="publish-title">
+  <AnimatedStack direction="column" spacing={1}>
+    <DialogTitle id="publish-title">Publish release?</DialogTitle>
+    <DialogContent>
+      <DialogContentText>This pushes the current build to production.</DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <ConfirmActions confirmLabel="Publish" onOk={publish} onCancel={close} />
+    </DialogActions>
+  </AnimatedStack>
+</AnimatedDialog>;
+```
+
+Nothing about the dialog changes: `open`, labelling and focus trapping still come
+from `AnimatedDialog`, and both components read `prefers-reduced-motion` — or
+their own `duration={0}` — so the pair collapses to an instant, motion-free
+dialog with the gradient resting as a static wash.
+
 ### `AnimatedSnackbar`
 
 A drop-in replacement for MUI's `Snackbar` that animates its enter/exit with
