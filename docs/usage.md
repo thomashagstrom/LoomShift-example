@@ -255,18 +255,48 @@ markup fits containers from 320px to 1440px without clipping. Animation is
 configured through the same optional, fully typed props as the rest of the
 library:
 
-| Prop       | Type                                             | Default       |
-| ---------- | ------------------------------------------------ | ------------- |
-| `variant`  | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
-| `duration` | `number` (milliseconds)                          | `250`         |
-| `easing`   | Framer Motion easing                             | `'easeInOut'` |
+| Prop         | Type                                             | Default       |
+| ------------ | ------------------------------------------------ | ------------- |
+| `variant`    | `'fade' \| 'grow' \| 'slide-up' \| 'slide-down'` | `'fade'`      |
+| `background` | `'gradient' \| 'none'`                           | `'gradient'`  |
+| `duration`   | `number` (milliseconds)                          | `250`         |
+| `easing`     | Framer Motion easing                             | `'easeInOut'` |
 
 `'fade'` is the default because it moves nothing, so dropping the component
 around an existing layout cannot shift it. The prop surface is exactly `Stack`'s
-plus these three, so an unknown prop is a TypeScript error.
+plus these four, so an unknown prop is a TypeScript error.
 
 The animation plays once per mount. Remount the stack — a changing `key` is the
 usual way — to play it again.
+
+#### The gradient background
+
+The stack paints its own surface by default, so a panel looks finished with no
+props beyond its children:
+
+```tsx
+<AnimatedStack>{children}</AnimatedStack>
+```
+
+It is a `linear-gradient` built from the theme's `primary` and `secondary`
+colours, tinted to 8% over `background.paper` and panned by a Framer Motion
+animation of its own — 12 seconds per sweep, alongside (not instead of) the
+enter animation. The pan ends on the frame it started from, so the loop repeats
+without a seam, and the tints are faint enough that every text style the theme
+pairs with `background.paper` stays above the WCAG AA contrast ratio at every
+frame, in light and dark theme alike.
+
+`sx` composes over the surface rather than being replaced by it, so a stack that
+is given its own colour keeps it. `background="none"` is the full opt-out — the
+transparent stack, with nothing painted behind the children:
+
+```tsx
+<AnimatedStack background="none">{children}</AnimatedStack>
+```
+
+Reduced motion — and `duration={0}` — stops the pan but keeps the surface: the
+gradient is colour rather than movement, so it rests on one frame instead of
+disappearing.
 
 ## Customising or disabling the animation
 

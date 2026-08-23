@@ -8,6 +8,14 @@ import type { MotionEasing } from '../shared/animation';
  */
 export type AnimatedStackVariant = 'fade' | 'grow' | 'slide-up' | 'slide-down';
 
+/**
+ * Surface painted behind the children. `'gradient'` is the default: a slow
+ * ambient pan across a gradient tinted from the theme palette, so a panel looks
+ * finished with no props at all. `'none'` is the full opt-out — the transparent
+ * stack, with nothing painted behind the children.
+ */
+export type AnimatedStackBackground = 'gradient' | 'none';
+
 /** Easing accepted by Framer Motion (named curve, cubic-bezier array, …). */
 export type AnimatedStackEasing = MotionEasing;
 
@@ -19,6 +27,8 @@ export type AnimatedStackEasing = MotionEasing;
 export interface AnimatedStackProps extends StackProps {
   /** Enter animation preset. Defaults to `'fade'`. */
   variant?: AnimatedStackVariant;
+  /** Surface painted behind the children. Defaults to `'gradient'`. */
+  background?: AnimatedStackBackground;
   /** Animation duration in milliseconds. Defaults to the shared `250`. */
   duration?: number;
   /** Framer Motion easing curve. Defaults to the shared `'easeInOut'`. */

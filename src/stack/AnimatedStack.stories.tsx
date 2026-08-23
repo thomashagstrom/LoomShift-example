@@ -9,7 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { ConfirmActions } from '../confirm-actions/ConfirmActions';
 import { AnimatedStack } from './AnimatedStack';
-import type { AnimatedStackVariant } from './types';
+import type { AnimatedStackBackground, AnimatedStackVariant } from './types';
 
 /** Placeholder content, so the stories show the layout rather than a design. */
 function Card({ children }: { children: React.ReactNode }) {
@@ -36,6 +36,9 @@ const meta = {
           'appears, never **how** it is arranged. It ships as its own feature slice with a',
           'subpath export.',
           '',
+          'It also paints its own surface out of the box: a gradient tinted from the theme',
+          'palette, panned slowly and continuously. `background="none"` turns it off.',
+          '',
           "```tsx\nimport { AnimatedStack } from 'loomshift-example/stack';\n```",
         ].join('\n'),
       },
@@ -47,6 +50,11 @@ const meta = {
       options: ['fade', 'grow', 'slide-up', 'slide-down'],
       table: { defaultValue: { summary: "'fade'" } },
     },
+    background: {
+      control: 'inline-radio',
+      options: ['gradient', 'none'],
+      table: { defaultValue: { summary: "'gradient'" } },
+    },
     duration: {
       control: { type: 'number', min: 0, step: 50 },
       table: { defaultValue: { summary: '250' } },
@@ -57,6 +65,7 @@ const meta = {
   },
   args: {
     variant: 'fade',
+    background: 'gradient',
     duration: 250,
     direction: 'column',
     spacing: 1,
@@ -124,6 +133,60 @@ export const Variants: Story = {
   },
 };
 
+/** The surface presets, with the one-line reason to reach for each. */
+const BACKGROUNDS: { background: AnimatedStackBackground; note: string }[] = [
+  {
+    background: 'gradient',
+    note: 'The default: a slow ambient tint drawn from the theme palette.',
+  },
+  {
+    background: 'none',
+    note: 'The full opt-out — the transparent stack, with nothing painted behind.',
+  },
+];
+
+export const Background: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The surface is on by default, so a panel looks finished with no props beyond',
+          'its children. It is one Framer Motion animation panning a `linear-gradient`',
+          'built from `primary` and `secondary`, tinted to 8% over `background.paper` —',
+          'faint enough to leave every text style legible, and slow enough (12s per',
+          'sweep) to read as ambient rather than as movement. The pan ends on the frame',
+          'it started from, so the loop has no seam. Replay re-mounts both stacks so the',
+          'enter animation and the start of the sweep can be compared in one glance.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: function BackgroundStory(args) {
+    const [run, setRun] = React.useState(0);
+
+    return (
+      <Stack spacing={3} sx={{ width: 360 }}>
+        <Button variant="outlined" onClick={() => setRun((count) => count + 1)}>
+          Replay
+        </Button>
+        {BACKGROUNDS.map(({ background, note }) => (
+          <Stack key={background} spacing={0.5}>
+            <Typography variant="subtitle2">background=&quot;{background}&quot;</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {note}
+            </Typography>
+            <AnimatedStack {...args} key={`${background}-${run}`} background={background}>
+              {CARDS.map((card) => (
+                <Card key={card}>{card}</Card>
+              ))}
+            </AnimatedStack>
+          </Stack>
+        ))}
+      </Stack>
+    );
+  },
+};
+
 export const DirectionAndSpacing: Story = {
   parameters: {
     docs: {
@@ -173,6 +236,11 @@ export const WithConfirmActions: Story = {
           'The stack constrains nothing itself — no width, no `overflow` — so the same',
           'markup fits containers from 320px up to 1440px without clipping, and the',
           'buttons stay fully interactive while the stack animates.',
+          '',
+          'It doubles as the contrast check for the default gradient: secondary text, the',
+          "field's outline and the destructive button all sit on the surface here, and",
+          'have to stay legible at every frame of the sweep, in light and dark theme',
+          'alike.',
         ].join('\n'),
       },
     },

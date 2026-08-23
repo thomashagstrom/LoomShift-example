@@ -25,6 +25,10 @@ declared as a peer dependency — not from a new bespoke effect.**
 - "Fancy animations" therefore means **a new `variant` preset on an existing
   component**, expressed as Framer Motion enter/exit targets — not a new
   animation mechanism.
+- Ambient motion follows the same rule: `AnimatedStack`'s default gradient
+  background is a Framer Motion animation on `background-position`, riding in
+  the same settled target as the enter animation with a repeating transition of
+  its own — not CSS `@keyframes` alongside it.
 
 Not chosen, and why:
 

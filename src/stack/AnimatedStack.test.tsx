@@ -4,6 +4,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import Divider from '@mui/material/Divider';
 import { ConfirmActions } from '../confirm-actions/ConfirmActions';
 import { AnimatedStack } from './AnimatedStack';
+import { GRADIENT_KEYFRAMES } from './gradient';
 import type { AnimatedStackVariant } from './types';
 
 afterEach(cleanup);
@@ -171,6 +172,70 @@ describe('AnimatedStack', () => {
     // stack is there before the next paint rather than fading in.
     await nextFrame();
     expect(stackRoot().style.opacity).toBe('1');
+  });
+
+  it('paints an animating gradient with no props but children', async () => {
+    render(
+      <AnimatedStack data-testid="stack">
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    const root = stackRoot();
+    // The surface itself is theme colour, so it is there from the first paint.
+    expect(getComputedStyle(root).backgroundImage).toContain('linear-gradient');
+
+    // The pan is a Framer Motion animation like every other in the library, so
+    // it lands on the element's own style once it starts — and keeps moving,
+    // which is the difference between an animated gradient and a static one.
+    await waitFor(() => expect(root.style.backgroundPosition).toMatch(/^[\d.]+% 50%$/));
+    const firstFrame = root.style.backgroundPosition;
+    await waitFor(() => expect(root.style.backgroundPosition).not.toBe(firstFrame));
+  });
+
+  it('leaves the surface transparent with background="none"', async () => {
+    render(
+      <AnimatedStack data-testid="stack" background="none">
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    await nextFrame();
+    await nextFrame();
+
+    const root = stackRoot();
+    expect(getComputedStyle(root).backgroundImage).toBe('');
+    expect(root.style.backgroundPosition).toBe('');
+  });
+
+  it('lets a caller sx override the gradient', () => {
+    render(
+      <AnimatedStack data-testid="stack" sx={{ backgroundColor: 'rgb(1, 2, 3)' }}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    // The surface is composed with the caller's `sx`, not merged over it: a
+    // stack that has been given its own colour keeps it.
+    expect(getComputedStyle(stackRoot()).backgroundColor).toBe('rgb(1, 2, 3)');
+  });
+
+  it('rests the gradient on one frame with duration={0}', async () => {
+    render(
+      <AnimatedStack data-testid="stack" duration={0}>
+        <span>only</span>
+      </AnimatedStack>,
+    );
+
+    await nextFrame();
+    await nextFrame();
+
+    const root = stackRoot();
+    // Turning the motion off keeps the surface — it is colour, not movement —
+    // and leaves it on the frame the pan would have started from.
+    expect(getComputedStyle(root).backgroundImage).toContain('linear-gradient');
+    expect(getComputedStyle(root).backgroundPosition).toBe(GRADIENT_KEYFRAMES[0]);
+    expect(root.style.backgroundPosition).toBe('');
   });
 
   it('rejects unknown props at the type level', () => {
