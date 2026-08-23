@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  alpha,
   createTheme,
   decomposeColor,
   getContrastRatio,
@@ -12,6 +13,7 @@ import {
   GRADIENT_TRANSITION,
   buildGradientStops,
   buildGradientSx,
+  buildGradientTransition,
 } from './gradient';
 
 /** WCAG AA for body-sized text. */
@@ -69,6 +71,44 @@ describe('the AnimatedStack gradient', () => {
     // colour instead of whatever happens to be behind the stack.
     expect(surface.backgroundColor).toBe(theme.palette.background.paper);
     expect(surface.backgroundPosition).toBe(GRADIENT_REST);
+  });
+
+  it('overrides the stops with valid override colours, tinted the same way', () => {
+    const theme = createTheme({
+      palette: { primary: { main: '#ff0000' }, secondary: { main: '#0000ff' } },
+    });
+
+    const stops = buildGradientStops(theme, ['#00ff00', '#ffff00']);
+    expect(stops).toEqual([
+      alpha('#00ff00', 0.08),
+      alpha('#ffff00', 0.08),
+      alpha('#00ff00', 0.08),
+    ]);
+  });
+
+  it.each([
+    ['too few colours', ['#00ff00']],
+    ['an empty array', []],
+    ['an unparsable colour', ['#00ff00', 'not-a-color']],
+  ])('falls back to the theme pair with %s', (_case, colors) => {
+    const theme = createTheme({
+      palette: { primary: { main: '#ff0000' }, secondary: { main: '#0000ff' } },
+    });
+
+    expect(buildGradientStops(theme, colors)).toEqual(buildGradientStops(theme));
+  });
+
+  it('overrides the angle in the built surface', () => {
+    const theme = createTheme();
+    expect(buildGradientSx(theme, { angle: '45deg' }).backgroundImage).toContain(
+      'linear-gradient(45deg,',
+    );
+  });
+
+  it('overrides the pan duration without touching the default transition', () => {
+    expect(buildGradientTransition()).toBe(GRADIENT_TRANSITION);
+    expect(buildGradientTransition(6000)).toEqual({ ...GRADIENT_TRANSITION, duration: 6 });
+    expect(GRADIENT_TRANSITION.duration).not.toBe(6);
   });
 
   describe.each(THEMES)('in the %s theme', (_mode, theme) => {
