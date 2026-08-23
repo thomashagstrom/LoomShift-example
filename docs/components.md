@@ -56,7 +56,9 @@ turned off for stacks that should stay see-through.
 
 **Use it when:** you need a simple row or column of items and want the group to
 appear gracefully — for example a panel whose contents are revealed after
-loading.
+loading. It is also the tidiest way to lay out a dialog: put one inside an
+`AnimatedDialog` and the heading, the message and the "Ok"/"Cancel" pair are
+spaced evenly down the panel, on that same faint wash, without any styling work.
 
 ## Shared behaviour
 
