@@ -102,6 +102,19 @@ from `AnimatedDialog`, and both components read `prefers-reduced-motion` — or
 their own `duration={0}` — so the pair collapses to an instant, motion-free
 dialog with the gradient resting as a static wash.
 
+The dialog has no gradient prop of its own — it renders whatever surface its
+`AnimatedStack` container paints — so the same `gradientColors`/`gradientAngle`
+override, and the `background="none"` opt-out, apply here exactly as they do on
+a bare [`AnimatedStack`](#animatedstack):
+
+```tsx
+<AnimatedDialog open={open} onClose={close}>
+  <AnimatedStack direction="column" spacing={1} gradientColors={['#4F46E5', '#EC4899']} gradientAngle="45deg">
+    {/* … */}
+  </AnimatedStack>
+</AnimatedDialog>
+```
+
 ### `AnimatedSnackbar`
 
 A drop-in replacement for MUI's `Snackbar` that animates its enter/exit with

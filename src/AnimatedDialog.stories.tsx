@@ -140,6 +140,100 @@ export const NoAnimation: Story = {
   },
 };
 
+export const WithBrandedGradient: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          '`gradientColors` and `gradientAngle` override the ambient theme gradient the',
+          'same way they do on a bare `AnimatedStack` — the dialog itself takes no',
+          'gradient prop of its own, it just renders whatever surface its `AnimatedStack`',
+          'container paints.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: function Render(args) {
+    const [, updateArgs] = useArgs();
+    const close = () => updateArgs({ open: false });
+
+    return (
+      <>
+        <Button variant="contained" onClick={() => updateArgs({ open: true })}>
+          Open dialog
+        </Button>
+        <AnimatedDialog {...args} onClose={close}>
+          <AnimatedStack
+            direction="column"
+            spacing={1}
+            gradientColors={['#4F46E5', '#EC4899']}
+            gradientAngle="45deg"
+          >
+            <DialogTitle>Publish release?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This pushes the current build to production. You can roll back afterwards.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <ConfirmActions
+                confirmLabel="Publish"
+                onOk={close}
+                onCancel={close}
+                okButtonProps={{ autoFocus: true }}
+              />
+            </DialogActions>
+          </AnimatedStack>
+        </AnimatedDialog>
+      </>
+    );
+  },
+};
+
+export const WithFlatStack: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          '`background="none"` on the container opts the dialog out of the ambient',
+          'gradient entirely — a plain, transparent stack behind the same layout, for',
+          'contexts where the gradient would compete with dense content.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: function Render(args) {
+    const [, updateArgs] = useArgs();
+    const close = () => updateArgs({ open: false });
+
+    return (
+      <>
+        <Button variant="contained" onClick={() => updateArgs({ open: true })}>
+          Open dialog
+        </Button>
+        <AnimatedDialog {...args} onClose={close}>
+          <AnimatedStack direction="column" spacing={1} background="none">
+            <DialogTitle>Publish release?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This pushes the current build to production. You can roll back afterwards.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <ConfirmActions
+                confirmLabel="Publish"
+                onOk={close}
+                onCancel={close}
+                okButtonProps={{ autoFocus: true }}
+              />
+            </DialogActions>
+          </AnimatedStack>
+        </AnimatedDialog>
+      </>
+    );
+  },
+};
+
 export const WithAnimatedStack: Story = {
   parameters: {
     docs: {

@@ -165,6 +165,39 @@ describe('AnimatedStack as the AnimatedDialog container', () => {
     expect(style.backgroundPosition).toBe(GRADIENT_REST);
   });
 
+  it('honours a gradientColors/gradientAngle override on the composed stack', async () => {
+    mockReducedMotion();
+    render(
+      <AnimatedDialog open aria-labelledby="branded-title">
+        <AnimatedStack
+          data-testid="dialog-stack"
+          gradientColors={['#4F46E5', '#EC4899']}
+          gradientAngle="45deg"
+        >
+          <DialogTitle id="branded-title">Branded dialog</DialogTitle>
+        </AnimatedStack>
+      </AnimatedDialog>,
+    );
+
+    const style = getComputedStyle(screen.getByTestId('dialog-stack'));
+    expect(style.backgroundImage).toContain('linear-gradient(45deg');
+    expect(style.backgroundImage).not.toContain('linear-gradient(120deg');
+  });
+
+  it('opts the composed stack out of the gradient via background="none"', async () => {
+    mockReducedMotion();
+    render(
+      <AnimatedDialog open aria-labelledby="flat-title">
+        <AnimatedStack data-testid="dialog-stack" background="none">
+          <DialogTitle id="flat-title">Flat dialog</DialogTitle>
+        </AnimatedStack>
+      </AnimatedDialog>,
+    );
+
+    const style = getComputedStyle(screen.getByTestId('dialog-stack'));
+    expect(style.backgroundImage).not.toContain('linear-gradient');
+  });
+
   it('keeps the dialog labelling and focus behaviour the stack now wraps', async () => {
     const { user, trigger } = await openFlow();
 
