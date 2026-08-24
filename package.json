@@ -29,6 +29,11 @@
       "import": "./dist/confirm-actions/index.js",
       "require": "./dist/confirm-actions/index.cjs"
     },
+    "./ok-cancel-buttons": {
+      "types": "./dist/ok-cancel-buttons/index.d.ts",
+      "import": "./dist/ok-cancel-buttons/index.js",
+      "require": "./dist/ok-cancel-buttons/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
