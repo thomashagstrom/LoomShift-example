@@ -10,6 +10,7 @@ import {
   DEFAULT_PRESS_DURATION,
   buildMotionTransition,
 } from '../shared/animation';
+import { isPromiseLike } from '../shared/promise';
 import type {
   ConfirmActionsAlign,
   ConfirmActionsPressVariant,
@@ -120,11 +121,6 @@ function usePressState(): [boolean, PressHandlers] {
   );
 
   return [pressed, handlers];
-}
-
-/** Anything with a `then` is close enough: we only ever await the result. */
-function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
-  return typeof (value as PromiseLike<unknown> | null | undefined)?.then === 'function';
 }
 
 /**
