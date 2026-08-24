@@ -39,6 +39,10 @@ answered the instant it's made.
 **Use it when:** a screen asks the user to confirm or back out of something and
 you want that choice to look and behave the same everywhere in the product.
 
+It is also published as **`OkCancelButtons`**, for teams who look for the pair
+by that name. It is the very same component, not a second one, so there is only
+ever one confirm/cancel pair to learn and to maintain.
+
 ## AnimatedStack
 
 A layout box that arranges whatever you put inside it in a row or a column with

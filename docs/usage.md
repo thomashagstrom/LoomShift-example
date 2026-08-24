@@ -255,6 +255,19 @@ feedback.
 Remaining props are forwarded to the underlying MUI `Stack`, so `sx` and
 `spacing` work as usual.
 
+### `OkCancelButtons`
+
+The same pair under the name dialogs and forms ask for it by. It is
+`ConfirmActions` itself, re-exported from its own subpath — same props, same
+defaults, same behaviour — so either import gives one consistent confirm/cancel
+pair:
+
+```tsx
+import { OkCancelButtons } from 'loomshift-example/ok-cancel-buttons';
+
+<OkCancelButtons onOk={save} onCancel={close} disableConfirm={!valid} />;
+```
+
 ### `AnimatedStack`
 
 A MUI `Stack` that animates itself in as it mounts, published under its own

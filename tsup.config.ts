@@ -5,6 +5,7 @@ export default defineConfig({
     'src/index.ts',
     'src/snackbar/index.ts',
     'src/confirm-actions/index.ts',
+    'src/ok-cancel-buttons/index.ts',
     'src/stack/index.ts',
   ],
   format: ['esm', 'cjs'],
