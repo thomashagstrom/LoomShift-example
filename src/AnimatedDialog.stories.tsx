@@ -1,3 +1,5 @@
+import * as React from 'react';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -7,6 +9,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useArgs } from 'storybook/preview-api';
 import { AnimatedDialog } from './AnimatedDialog';
 import { ConfirmActions } from './confirm-actions/ConfirmActions';
+import { AnimatedSnackbar } from './snackbar/AnimatedSnackbar';
 import { AnimatedStack } from './stack/AnimatedStack';
 
 const meta = {
@@ -24,7 +27,9 @@ const meta = {
           '',
           'Every story below is a real flow: open the dialog from the trigger button and',
           'the footer is the shared `ConfirmActions` pair, so the press animation, Esc,',
-          'Cancel and the focus handover are all reachable from here.',
+          'Cancel and the focus handover are all reachable from here. Confirming closes',
+          'the dialog and leaves a `Release published` confirmation on the page, since a',
+          'dialog that just disappears never tells the user the action landed.',
           '',
           "```tsx\nimport { AnimatedDialog } from 'loomshift-example';\n```",
         ].join('\n'),
@@ -63,7 +68,15 @@ const meta = {
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs();
+    const [published, setPublished] = React.useState(false);
     const close = () => updateArgs({ open: false });
+    const dismissConfirmation = () => setPublished(false);
+    // Confirming publishes: the dialog goes away, so the outcome is acknowledged
+    // on the page behind it rather than vanishing with the dialog.
+    const publish = () => {
+      close();
+      setPublished(true);
+    };
 
     return (
       <>
@@ -82,12 +95,17 @@ const meta = {
                 MUI's focus trap hands it back to the trigger on close. */}
             <ConfirmActions
               confirmLabel="Publish"
-              onOk={close}
+              onOk={publish}
               onCancel={close}
               okButtonProps={{ autoFocus: true }}
             />
           </DialogActions>
         </AnimatedDialog>
+        <AnimatedSnackbar open={published} autoHideDuration={4000} onClose={dismissConfirmation}>
+          <Alert severity="success" onClose={dismissConfirmation}>
+            Release published
+          </Alert>
+        </AnimatedSnackbar>
       </>
     );
   },
