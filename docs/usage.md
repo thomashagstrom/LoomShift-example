@@ -159,6 +159,15 @@ function Example({ onClose }: { onClose: () => void }) {
 }
 ```
 
+The same component is also exported as **`OkCancelButtons`** (with
+`OkCancelButtonsProps`), for codebases that reach for the pair by what it renders
+rather than by what it does. It is an alias, not a variant — same props, same
+defaults, same behaviour:
+
+```tsx
+import { OkCancelButtons } from 'loomshift-example/confirm-actions';
+```
+
 Its most common home is a dialog's `DialogActions`. Labelling and focus trapping
 come from the dialog, so `ConfirmActions` only renders the buttons:
 

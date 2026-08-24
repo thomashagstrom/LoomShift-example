@@ -24,7 +24,7 @@ motion so the message feels noticed rather than just appearing and vanishing.
 **Use it when:** you want short-lived confirmations or status messages to
 feel more alive and easier to notice.
 
-## ConfirmActions
+## ConfirmActions (also known as OkCancelButtons)
 
 The pair of "Ok" and "Cancel" buttons that ends a confirmation. Any screen can
 drop it in — a dialog, a form footer, an inline panel — and get the same
@@ -38,6 +38,10 @@ answered the instant it's made.
 
 **Use it when:** a screen asks the user to confirm or back out of something and
 you want that choice to look and behave the same everywhere in the product.
+
+It answers to both names — `ConfirmActions` and `OkCancelButtons` — because they
+are the same component, so there is never a second Ok/Cancel pair to keep in
+step with this one.
 
 ## AnimatedStack
 
