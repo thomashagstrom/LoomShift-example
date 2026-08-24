@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import type { DialogProps } from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
 import type { TransitionProps } from '@mui/material/transitions';
 import { motion, useReducedMotion } from 'framer-motion';
 import type {
@@ -8,12 +9,15 @@ import type {
   Transition as MotionTransitionConfig,
   Variants,
 } from 'framer-motion';
+import { ConfirmActions } from './confirm-actions/ConfirmActions';
+import type { ConfirmActionsProps } from './confirm-actions/types';
 import {
   DEFAULT_DURATION,
   DEFAULT_EASING,
   buildMotionTransition,
   type MotionEasing,
 } from './shared/animation';
+import { isPromiseLike } from './shared/promise';
 
 /**
  * Built-in enter/exit animations. `variant` is fully optional on
@@ -170,13 +174,44 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
   },
 );
 
-export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionComponent'> {
+/**
+ * Why the dialog is asking to close: MUI's own reasons, plus the two the
+ * built-in footer adds, so a host can tell a confirm from a plain dismissal.
+ */
+export type AnimatedDialogCloseReason =
+  | Parameters<NonNullable<DialogProps['onClose']>>[1]
+  | 'confirm'
+  | 'cancel';
+
+export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionComponent' | 'onClose'> {
   /** Enter/exit animation preset. Defaults to `'zoom'`. */
   variant?: AnimatedDialogVariant;
   /** Animation duration in milliseconds. Defaults to `250`. */
   duration?: number;
   /** Framer Motion easing curve. Defaults to `'easeInOut'`. */
   easing?: AnimatedDialogEasing;
+  /**
+   * Fired once per confirm. Passing it — or {@link AnimatedDialogProps.onCancel}
+   * — renders the shared Ok/Cancel pair as the dialog's footer.
+   *
+   * Return the promise of an async confirm and the Ok button stays busy until
+   * it settles: the dialog closes once it resolves, and stays open if it
+   * rejects, so the user can read the failure and retry.
+   */
+  onConfirm?: () => void | PromiseLike<unknown>;
+  /** Fired once per cancel, before the dialog closes. */
+  onCancel?: () => void;
+  /**
+   * Escape hatch for the built-in footer — labels, `destructive`, `pressVariant`
+   * and the rest of {@link ConfirmActionsProps}. The two callbacks stay owned by
+   * the dialog, which is what lets it close itself afterwards.
+   */
+  confirmActionsProps?: Omit<ConfirmActionsProps, 'onOk' | 'onCancel'>;
+  /**
+   * Callback fired when the dialog requests to be closed. Widens MUI's `reason`
+   * with `'confirm'` and `'cancel'` for the built-in footer's two actions.
+   */
+  onClose?: (event: object, reason: AnimatedDialogCloseReason) => void;
 }
 
 /**
@@ -185,6 +220,12 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
  * All MUI `Dialog` props are supported and forwarded, so accessibility roles
  * (`role="dialog"`, `aria-modal`, labelling) and focus trapping are preserved.
  * Users who set `prefers-reduced-motion` get an instant, motion-free transition.
+ *
+ * Pass `onConfirm`/`onCancel` and the dialog appends the shared
+ * {@link ConfirmActions} pair — Ok first, Cancel second, both with the press
+ * animation — as its footer, and closes itself through `onClose` once the
+ * matching callback has run. Hosts that want a different footer keep composing
+ * their own `DialogActions` in `children` instead; the two never both appear.
  */
 export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogProps>(
   function AnimatedDialog(
@@ -193,13 +234,47 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
       duration = DEFAULT_DURATION,
       easing = DEFAULT_EASING,
       TransitionProps: transitionProps,
+      onConfirm,
+      onCancel,
+      onClose,
+      confirmActionsProps,
+      children,
       ...dialogProps
     },
     ref,
   ) {
+    const hasConfirmActions = Boolean(onConfirm ?? onCancel);
+
+    // The dialog is controlled, so closing it means asking the host to. The
+    // reason names the action that got us here, which is all a host needs to
+    // tell an accepted dialog from a dismissed one.
+    const requestClose = (reason: AnimatedDialogCloseReason) => onClose?.({}, reason);
+
+    const handleOk = () => {
+      const result = onConfirm?.();
+      if (!isPromiseLike(result)) {
+        requestClose('confirm');
+        return;
+      }
+
+      // Handing the promise back keeps the Ok button busy for as long as the
+      // confirm runs. A rejection propagates untouched — it leaves the dialog
+      // open and surfaces the same way any other failed async confirm does.
+      return result.then((value) => {
+        requestClose('confirm');
+        return value;
+      });
+    };
+
+    const handleCancel = () => {
+      onCancel?.();
+      requestClose('cancel');
+    };
+
     return (
       <Dialog
         ref={ref}
+        onClose={onClose}
         TransitionComponent={
           MotionTransition as unknown as NonNullable<DialogProps['TransitionComponent']>
         }
@@ -212,7 +287,21 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
           } as unknown as TransitionProps
         }
         {...dialogProps}
-      />
+      >
+        {children}
+        {hasConfirmActions ? (
+          <DialogActions>
+            <ConfirmActions
+              {...confirmActionsProps}
+              onOk={handleOk}
+              onCancel={handleCancel}
+              // Focus lands on Ok as the dialog opens; MUI's focus trap hands it
+              // back to the trigger on close.
+              okButtonProps={{ autoFocus: true, ...confirmActionsProps?.okButtonProps }}
+            />
+          </DialogActions>
+        ) : null}
+      </Dialog>
     );
   },
 );

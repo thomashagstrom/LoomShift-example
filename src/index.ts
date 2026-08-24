@@ -13,4 +13,5 @@ export type {
   AnimatedDialogProps,
   AnimatedDialogVariant,
   AnimatedDialogEasing,
+  AnimatedDialogCloseReason,
 } from './AnimatedDialog';

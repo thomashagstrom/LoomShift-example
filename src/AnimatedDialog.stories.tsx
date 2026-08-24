@@ -31,6 +31,11 @@ const meta = {
           'the dialog and leaves a `Release published` confirmation on the page, since a',
           'dialog that just disappears never tells the user the action landed.',
           '',
+          'Pass `onConfirm`/`onCancel` and that footer comes built in: the dialog renders',
+          'the pair for you and closes itself through `onClose` once your callback has',
+          'run, with a `reason` of `confirm` or `cancel`. Compose your own `DialogActions`',
+          'in `children` instead when you need a different footer.',
+          '',
           "```tsx\nimport { AnimatedDialog } from 'loomshift-example';\n```",
         ].join('\n'),
       },
@@ -71,35 +76,29 @@ const meta = {
     const [published, setPublished] = React.useState(false);
     const close = () => updateArgs({ open: false });
     const dismissConfirmation = () => setPublished(false);
-    // Confirming publishes: the dialog goes away, so the outcome is acknowledged
-    // on the page behind it rather than vanishing with the dialog.
-    const publish = () => {
-      close();
-      setPublished(true);
-    };
+    // Confirming publishes; the dialog closes itself afterwards, so the outcome
+    // is acknowledged on the page behind it rather than vanishing with it.
+    const publish = () => setPublished(true);
 
     return (
       <>
         <Button variant="contained" onClick={() => updateArgs({ open: true })}>
           Open dialog
         </Button>
-        <AnimatedDialog {...args} onClose={close}>
+        {/* `onConfirm` is all the footer takes: the dialog renders the Ok/Cancel
+            pair, focuses Ok as it opens, and closes through `onClose`. */}
+        <AnimatedDialog
+          {...args}
+          onClose={close}
+          onConfirm={publish}
+          confirmActionsProps={{ confirmLabel: 'Publish' }}
+        >
           <DialogTitle>Publish release?</DialogTitle>
           <DialogContent>
             <DialogContentText>
               This pushes the current build to production. You can roll back afterwards.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
-            {/* `autoFocus` lands focus on the confirm button as the dialog opens;
-                MUI's focus trap hands it back to the trigger on close. */}
-            <ConfirmActions
-              confirmLabel="Publish"
-              onOk={publish}
-              onCancel={close}
-              okButtonProps={{ autoFocus: true }}
-            />
-          </DialogActions>
         </AnimatedDialog>
         <AnimatedSnackbar open={published} autoHideDuration={4000} onClose={dismissConfirmation}>
           <Alert severity="success" onClose={dismissConfirmation}>
@@ -165,7 +164,9 @@ export const WithAnimatedStack: Story = {
         story: [
           'Nest an `AnimatedStack` as the dialog’s container and the title, body and',
           '`ConfirmActions` become its direct flex items: one column, even spacing and the',
-          'ambient gradient surface behind all three, for free. Nothing about the dialog',
+          'ambient gradient surface behind all three, for free. The footer is composed by',
+          'hand here rather than through `onConfirm`, because it has to sit inside the',
+          'stack to be one of those flex items. Nothing about the dialog',
           'changes — labelling, focus trapping and `open` all still come from',
           '`AnimatedDialog` — so `duration={0}` and `prefers-reduced-motion` collapse both',
           'the dialog transition and the stack’s enter animation, leaving the gradient as a',
