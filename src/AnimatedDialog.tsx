@@ -208,6 +208,12 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
    */
   confirmActionsProps?: Omit<ConfirmActionsProps, 'onOk' | 'onCancel'>;
   /**
+   * Ignore clicks on the backdrop, so the dialog can only be left through one of
+   * its own actions. The keyboard counterpart is MUI's `disableEscapeKeyDown`.
+   * Defaults to `false` — outside clicks dismiss.
+   */
+  disableBackdropDismiss?: boolean;
+  /**
    * Callback fired when the dialog requests to be closed. Widens MUI's `reason`
    * with `'confirm'` and `'cancel'` for the built-in footer's two actions.
    */
@@ -226,6 +232,13 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
  * animation — as its footer, and closes itself through `onClose` once the
  * matching callback has run. Hosts that want a different footer keep composing
  * their own `DialogActions` in `children` instead; the two never both appear.
+ *
+ * A click on the backdrop or a press of Esc asks to close the same way, with a
+ * reason of `'backdropClick'` or `'escapeKeyDown'`, and MUI's focus trap hands
+ * focus back to the element that opened the dialog. Set
+ * {@link AnimatedDialogProps.disableBackdropDismiss} or MUI's
+ * `disableEscapeKeyDown` to turn either one off for a dialog that must be
+ * answered.
  */
 export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogProps>(
   function AnimatedDialog(
@@ -238,6 +251,7 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
       onCancel,
       onClose,
       confirmActionsProps,
+      disableBackdropDismiss = false,
       children,
       ...dialogProps
     },
@@ -245,10 +259,21 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
   ) {
     const hasConfirmActions = Boolean(onConfirm ?? onCancel);
 
+    // Every close request funnels through here, MUI's own dismissals included,
+    // so a dialog that opts out of backdrop dismissal never reaches the host
+    // with that reason. Esc opts out through MUI's `disableEscapeKeyDown`,
+    // which stops the event before it ever becomes a close request.
+    const handleClose = (event: object, reason: AnimatedDialogCloseReason) => {
+      if (reason === 'backdropClick' && disableBackdropDismiss) {
+        return;
+      }
+      onClose?.(event, reason);
+    };
+
     // The dialog is controlled, so closing it means asking the host to. The
     // reason names the action that got us here, which is all a host needs to
     // tell an accepted dialog from a dismissed one.
-    const requestClose = (reason: AnimatedDialogCloseReason) => onClose?.({}, reason);
+    const requestClose = (reason: AnimatedDialogCloseReason) => handleClose({}, reason);
 
     const handleOk = () => {
       const result = onConfirm?.();
@@ -274,7 +299,7 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
     return (
       <Dialog
         ref={ref}
-        onClose={onClose}
+        onClose={handleClose}
         TransitionComponent={
           MotionTransition as unknown as NonNullable<DialogProps['TransitionComponent']>
         }

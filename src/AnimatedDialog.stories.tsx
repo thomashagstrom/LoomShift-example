@@ -162,6 +162,23 @@ export const NoAnimation: Story = {
   },
 };
 
+export const UndismissableBackdrop: Story = {
+  args: { disableBackdropDismiss: true, disableEscapeKeyDown: true },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'A dialog is dismissable by default: clicking the backdrop or pressing Esc closes',
+          'it through `onClose` with a reason of `backdropClick` or `escapeKeyDown`, and',
+          'focus returns to the trigger button either way. Reserve the two opt-outs —',
+          '`disableBackdropDismiss` and MUI’s `disableEscapeKeyDown`, both set here — for a',
+          'dialog that must be answered: with them on, only Publish and Cancel close it.',
+        ].join('\n'),
+      },
+    },
+  },
+};
+
 export const WithAnimatedStack: Story = {
   parameters: {
     docs: {
