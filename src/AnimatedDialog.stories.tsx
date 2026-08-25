@@ -66,7 +66,12 @@ const meta = {
     },
   },
   args: {
-    open: true,
+    // Closed by default: every story's whole point is "open the dialog from
+    // the trigger button" (see the component description above), and the
+    // "Open dialog" button rendered by `render` below can't do that if the
+    // dialog is already open and sitting on top of it — the trigger becomes
+    // unreachable on first load, for anyone, not just a scripted click.
+    open: false,
     variant: 'zoom',
     duration: 250,
     easing: 'easeInOut',
