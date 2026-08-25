@@ -11,9 +11,11 @@ appearing abruptly. It looks and behaves exactly like a standard dialog, so
 designers and users get the same familiar experience, just with a more
 polished feel.
 
-Users can walk away from it the way they expect: clicking outside the dialog or
-pressing Esc closes it, and the button that opened it gets the keyboard's
-attention back. A dialog that must be answered can switch both off.
+Users can walk away from it the way they expect: a × button in the corner of the
+dialog, a click outside it, or a press of Esc all close it, and the button that
+opened it gets the keyboard's attention back. The × is the one they can see —
+the other two are worth knowing but easy to miss. A dialog that must be answered
+can switch all three off.
 
 **Use it when:** you already use dialogs/modals and want them to feel less
 jarring, without changing how they're triggered or what's inside them.

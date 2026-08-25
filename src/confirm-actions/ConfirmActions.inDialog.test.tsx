@@ -92,8 +92,11 @@ describe('ConfirmActions in a confirmation dialog', () => {
     await openFlow();
 
     // Only the dialog's own buttons: MUI hides the trigger from the
-    // accessibility tree for as long as the modal is open.
-    const buttons = screen.getAllByRole('button');
+    // accessibility tree for as long as the modal is open. The dialog's × sits
+    // in the header ahead of the pair, so it is left out of the footer's order.
+    const buttons = screen
+      .getAllByRole('button')
+      .filter((button) => button.getAttribute('aria-label') !== 'Close');
     expect(buttons.map((button) => button.textContent)).toEqual(['Publish', 'Cancel']);
   });
 

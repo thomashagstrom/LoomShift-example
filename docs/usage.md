@@ -93,13 +93,31 @@ that is MUI's focus trap, so it costs nothing extra:
 </AnimatedDialog>
 ```
 
-For a dialog that must be answered — a destructive confirm, say — turn either
-route off. `disableBackdropDismiss` ignores outside clicks and MUI's own
-`disableEscapeKeyDown` ignores the key; the built-in Ok/Cancel footer is then the
-only way out:
+Neither route is visible, so the dialog also puts a × button in the corner of its
+header — pinned there whatever the header is composed of — which closes it with a
+reason of `'closeButton'` and hands focus back the same way. `closeButtonLabel`
+sets its accessible name (`'Close'` by default), and `hideCloseButton` drops it
+for a header that carries its own:
 
 ```tsx
-<AnimatedDialog open={open} onClose={close} disableBackdropDismiss disableEscapeKeyDown>
+<AnimatedDialog open={open} onClose={close} closeButtonLabel="Stäng">
+  {/* … */}
+</AnimatedDialog>
+```
+
+For a dialog that must be answered — a destructive confirm, say — turn the routes
+off. `disableBackdropDismiss` ignores outside clicks, MUI's own
+`disableEscapeKeyDown` ignores the key and `hideCloseButton` takes the × away; the
+built-in Ok/Cancel footer is then the only way out:
+
+```tsx
+<AnimatedDialog
+  open={open}
+  onClose={close}
+  disableBackdropDismiss
+  disableEscapeKeyDown
+  hideCloseButton
+>
   {/* … */}
 </AnimatedDialog>
 ```

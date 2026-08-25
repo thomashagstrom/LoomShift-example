@@ -54,6 +54,18 @@ function ConfirmDialog(props: Partial<AnimatedDialogProps>) {
   );
 }
 
+/**
+ * The footer's buttons, in DOM order. The dialog's own × sits in the header
+ * ahead of them, so it is left out here — it has its own suite, in
+ * `AnimatedDialog.closeButton.test.tsx`.
+ */
+function footerLabels(): (string | null)[] {
+  return screen
+    .queryAllByRole('button')
+    .filter((button) => button.getAttribute('aria-label') !== 'Close')
+    .map((button) => button.textContent);
+}
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -64,15 +76,14 @@ describe('AnimatedDialog Ok/Cancel footer', () => {
     mockReducedMotion();
     render(<ConfirmDialog onConfirm={vi.fn()} onCancel={vi.fn()} />);
 
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.map((button) => button.textContent)).toEqual(['Ok', 'Cancel']);
+    expect(footerLabels()).toEqual(['Ok', 'Cancel']);
   });
 
   it('renders no footer when neither callback is given', () => {
     mockReducedMotion();
     render(<ConfirmDialog />);
 
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(footerLabels()).toEqual([]);
   });
 
   it('focuses Ok as the dialog opens', async () => {
@@ -152,8 +163,7 @@ describe('AnimatedDialog Ok/Cancel footer', () => {
       />,
     );
 
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.map((button) => button.textContent)).toEqual(['Publish', 'Not now']);
+    expect(footerLabels()).toEqual(['Publish', 'Not now']);
   });
 
   it('keeps the dialog open and Ok busy until an async confirm resolves', async () => {

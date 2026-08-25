@@ -26,8 +26,9 @@ const meta = {
           '`prefers-reduced-motion` get an instant, motion-free transition.',
           '',
           'Every story below is a real flow: open the dialog from the trigger button and',
-          'the footer is the shared `ConfirmActions` pair, so the press animation, Esc,',
-          'Cancel and the focus handover are all reachable from here. Confirming closes',
+          'the header carries the × close button while the footer is the shared',
+          '`ConfirmActions` pair, so the press animation, Esc, Cancel and the focus',
+          'handover are all reachable from here. Confirming closes',
           'the dialog and leaves a `Release published` confirmation on the page, since a',
           'dialog that just disappears never tells the user the action landed.',
           '',
@@ -163,16 +164,18 @@ export const NoAnimation: Story = {
 };
 
 export const UndismissableBackdrop: Story = {
-  args: { disableBackdropDismiss: true, disableEscapeKeyDown: true },
+  args: { disableBackdropDismiss: true, disableEscapeKeyDown: true, hideCloseButton: true },
   parameters: {
     docs: {
       description: {
         story: [
-          'A dialog is dismissable by default: clicking the backdrop or pressing Esc closes',
-          'it through `onClose` with a reason of `backdropClick` or `escapeKeyDown`, and',
-          'focus returns to the trigger button either way. Reserve the two opt-outs —',
-          '`disableBackdropDismiss` and MUI’s `disableEscapeKeyDown`, both set here — for a',
-          'dialog that must be answered: with them on, only Publish and Cancel close it.',
+          'A dialog is dismissable by default: the × in its header, a click on the backdrop',
+          'or a press of Esc all close it through `onClose` — with a reason of',
+          '`closeButton`, `backdropClick` or `escapeKeyDown` — and focus returns to the',
+          'trigger button whichever route is taken. Reserve the three opt-outs —',
+          '`hideCloseButton`, `disableBackdropDismiss` and MUI’s `disableEscapeKeyDown`, all',
+          'set here — for a dialog that must be answered: with them on, only Publish and',
+          'Cancel close it.',
         ].join('\n'),
       },
     },

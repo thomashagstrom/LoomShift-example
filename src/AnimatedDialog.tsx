@@ -2,6 +2,7 @@ import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import type { DialogProps } from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
 import type { TransitionProps } from '@mui/material/transitions';
 import { motion, useReducedMotion } from 'framer-motion';
 import type {
@@ -175,13 +176,17 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
 );
 
 /**
- * Why the dialog is asking to close: MUI's own reasons, plus the two the
- * built-in footer adds, so a host can tell a confirm from a plain dismissal.
+ * Why the dialog is asking to close: MUI's own reasons, plus the three the
+ * dialog's own chrome adds — the footer's two actions and the header's × — so a
+ * host can tell a confirm from a plain dismissal.
  */
 export type AnimatedDialogCloseReason =
   | Parameters<NonNullable<DialogProps['onClose']>>[1]
   | 'confirm'
-  | 'cancel';
+  | 'cancel'
+  | 'closeButton';
+
+const DEFAULT_CLOSE_BUTTON_LABEL = 'Close';
 
 export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionComponent' | 'onClose'> {
   /** Enter/exit animation preset. Defaults to `'zoom'`. */
@@ -214,6 +219,17 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
    */
   disableBackdropDismiss?: boolean;
   /**
+   * Drop the × button from the dialog's header, for a header that carries its
+   * own close affordance. Defaults to `false` — the button is there for as long
+   * as the dialog is open.
+   */
+  hideCloseButton?: boolean;
+  /**
+   * Accessible label of the header's × button, since the glyph itself says
+   * nothing to a screen reader. Defaults to `'Close'`.
+   */
+  closeButtonLabel?: string;
+  /**
    * Callback fired when the dialog requests to be closed. Widens MUI's `reason`
    * with `'confirm'` and `'cancel'` for the built-in footer's two actions.
    */
@@ -239,6 +255,11 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
  * {@link AnimatedDialogProps.disableBackdropDismiss} or MUI's
  * `disableEscapeKeyDown` to turn either one off for a dialog that must be
  * answered.
+ *
+ * Neither of those two routes is visible, so the dialog also puts a × button in
+ * the corner of its header — a close that can be seen, pointed at and tabbed to,
+ * reporting a reason of `'closeButton'`. Hide it with
+ * {@link AnimatedDialogProps.hideCloseButton}.
  */
 export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogProps>(
   function AnimatedDialog(
@@ -252,6 +273,8 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
       onClose,
       confirmActionsProps,
       disableBackdropDismiss = false,
+      hideCloseButton = false,
+      closeButtonLabel = DEFAULT_CLOSE_BUTTON_LABEL,
       children,
       ...dialogProps
     },
@@ -313,6 +336,26 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
         }
         {...dialogProps}
       >
+        {hideCloseButton ? null : (
+          // Pinned to the corner of the paper rather than laid out in the flow,
+          // so it sits in the header whatever the host composes there — a
+          // `DialogTitle`, an `AnimatedStack`, or nothing at all.
+          <IconButton
+            aria-label={closeButtonLabel}
+            onClick={() => requestClose('closeButton')}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            {/* The glyph is decorative; `aria-label` above is the name. */}
+            <span aria-hidden="true" style={{ fontSize: '1.25rem', lineHeight: 1 }}>
+              &times;
+            </span>
+          </IconButton>
+        )}
         {children}
         {hasConfirmActions ? (
           <DialogActions>
