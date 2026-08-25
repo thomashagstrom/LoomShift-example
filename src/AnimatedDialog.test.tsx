@@ -74,7 +74,7 @@ describe('AnimatedDialog', () => {
     expect(screen.getByText('Custom animation')).toBeTruthy();
   });
 
-  it('renders content instantly when the user prefers reduced motion', () => {
+  it('renders its content whatever the motion preference', () => {
     mockReducedMotion(true);
     render(
       <AnimatedDialog open>
@@ -82,22 +82,24 @@ describe('AnimatedDialog', () => {
       </AnimatedDialog>,
     );
 
-    // With reduced motion the dialog must still render its content; the shared
-    // transition simply collapses its duration to zero (see shared/animation).
+    // Only that the content is there: Framer Motion reads `matchMedia` once per
+    // module instance, so the `no-preference` stated above wins for this whole
+    // file no matter what a later test asks for. The motion-free transition
+    // itself is asserted in `AnimatedDialog.reducedMotion.test.tsx`.
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(screen.getByText('Reduced motion body')).toBeTruthy();
   });
 
   it('drives the MUI transition lifecycle callbacks through Framer Motion', async () => {
-    // Reduced motion collapses the duration to zero so the enter animation
-    // completes synchronously, exercising the onEnter -> onEntered lifecycle
-    // that bridges Framer Motion back to MUI's mount/unmount contract.
+    // `duration={0}` collapses the enter animation so it completes within a
+    // frame, exercising the onEnter -> onEntered lifecycle that bridges Framer
+    // Motion back to MUI's mount/unmount contract without waiting it out.
     mockReducedMotion(true);
     const onEnter = vi.fn();
     const onEntered = vi.fn();
 
     render(
-      <AnimatedDialog open TransitionProps={{ onEnter, onEntered }}>
+      <AnimatedDialog open duration={0} TransitionProps={{ onEnter, onEntered }}>
         <p>Lifecycle body</p>
       </AnimatedDialog>,
     );
@@ -110,7 +112,7 @@ describe('AnimatedDialog', () => {
     mockReducedMotion(true);
     const onExited = vi.fn();
     const { rerender } = render(
-      <AnimatedDialog open TransitionProps={{ onExited }}>
+      <AnimatedDialog open duration={0} TransitionProps={{ onExited }}>
         <p>Closing body</p>
       </AnimatedDialog>,
     );
@@ -118,7 +120,7 @@ describe('AnimatedDialog', () => {
     expect(screen.getByText('Closing body')).toBeTruthy();
 
     rerender(
-      <AnimatedDialog open={false} TransitionProps={{ onExited }}>
+      <AnimatedDialog open={false} duration={0} TransitionProps={{ onExited }}>
         <p>Closing body</p>
       </AnimatedDialog>,
     );
