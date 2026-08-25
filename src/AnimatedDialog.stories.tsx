@@ -36,6 +36,10 @@ const meta = {
           'run, with a `reason` of `confirm` or `cancel`. Compose your own `DialogActions`',
           'in `children` instead when you need a different footer.',
           '',
+          'Every dialog also carries a × in its top-right corner, so there is an explicit',
+          'way out alongside the backdrop and Esc. It closes through `onClose` with a reason',
+          'of `closeButton`; `hideCloseButton` drops it.',
+          '',
           "```tsx\nimport { AnimatedDialog } from 'loomshift-example';\n```",
         ].join('\n'),
       },
@@ -163,15 +167,16 @@ export const NoAnimation: Story = {
 };
 
 export const UndismissableBackdrop: Story = {
-  args: { disableBackdropDismiss: true, disableEscapeKeyDown: true },
+  args: { disableBackdropDismiss: true, disableEscapeKeyDown: true, hideCloseButton: true },
   parameters: {
     docs: {
       description: {
         story: [
-          'A dialog is dismissable by default: clicking the backdrop or pressing Esc closes',
-          'it through `onClose` with a reason of `backdropClick` or `escapeKeyDown`, and',
-          'focus returns to the trigger button either way. Reserve the two opt-outs —',
-          '`disableBackdropDismiss` and MUI’s `disableEscapeKeyDown`, both set here — for a',
+          'A dialog is dismissable by default: the × in its top-right corner, a click on the',
+          'backdrop and a press of Esc all close it through `onClose` — with a reason of',
+          '`closeButton`, `backdropClick` or `escapeKeyDown` — and focus returns to the',
+          'trigger button every way out. Reserve the three opt-outs — `hideCloseButton`,',
+          '`disableBackdropDismiss` and MUI’s `disableEscapeKeyDown`, all set here — for a',
           'dialog that must be answered: with them on, only Publish and Cancel close it.',
         ].join('\n'),
       },

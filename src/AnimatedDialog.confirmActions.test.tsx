@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -54,6 +54,25 @@ function ConfirmDialog(props: Partial<AnimatedDialogProps>) {
   );
 }
 
+/**
+ * The footer, if the dialog rendered one. Queries are scoped to it so the
+ * dialog's own × close button is never mistaken for one of its actions.
+ */
+function footerOf(dialog: HTMLElement): HTMLElement | null {
+  return dialog.querySelector('.MuiDialogActions-root');
+}
+
+/** The labels of the footer's buttons, in DOM order. */
+function footerLabels(): (string | null)[] {
+  const footer = footerOf(screen.getByRole('dialog'));
+  if (!footer) {
+    throw new Error('Dialog rendered no footer');
+  }
+  return within(footer)
+    .getAllByRole('button')
+    .map((button) => button.textContent);
+}
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -64,15 +83,14 @@ describe('AnimatedDialog Ok/Cancel footer', () => {
     mockReducedMotion();
     render(<ConfirmDialog onConfirm={vi.fn()} onCancel={vi.fn()} />);
 
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.map((button) => button.textContent)).toEqual(['Ok', 'Cancel']);
+    expect(footerLabels()).toEqual(['Ok', 'Cancel']);
   });
 
   it('renders no footer when neither callback is given', () => {
     mockReducedMotion();
     render(<ConfirmDialog />);
 
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(footerOf(screen.getByRole('dialog'))).toBeNull();
   });
 
   it('focuses Ok as the dialog opens', async () => {
@@ -152,8 +170,7 @@ describe('AnimatedDialog Ok/Cancel footer', () => {
       />,
     );
 
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.map((button) => button.textContent)).toEqual(['Publish', 'Not now']);
+    expect(footerLabels()).toEqual(['Publish', 'Not now']);
   });
 
   it('keeps the dialog open and Ok busy until an async confirm resolves', async () => {

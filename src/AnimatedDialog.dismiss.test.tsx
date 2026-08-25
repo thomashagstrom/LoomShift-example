@@ -160,3 +160,64 @@ describe('AnimatedDialog dismissal', () => {
     expect(onClose).toHaveBeenCalledWith(expect.anything(), 'escapeKeyDown');
   });
 });
+
+describe('AnimatedDialog close button', () => {
+  it('shows a labelled close button in the dialog for as long as it is open', async () => {
+    mockReducedMotion();
+    const user = userEvent.setup();
+    render(<DismissibleDialog />);
+
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    expect(screen.getByRole('dialog').contains(close)).toBe(true);
+  });
+
+  it('closes and reports closeButton when the user clicks it', async () => {
+    mockReducedMotion();
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    render(<DismissibleDialog onClose={onClose} />);
+
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledWith(expect.anything(), 'closeButton');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+
+  it('returns focus to the triggering element after a close button dismissal', async () => {
+    mockReducedMotion();
+    const user = userEvent.setup();
+    render(<DismissibleDialog />);
+
+    const trigger = screen.getByRole('button', { name: 'Open' });
+    await user.click(trigger);
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+
+  it('takes a label of its own, for a dialog that is not in English', async () => {
+    mockReducedMotion();
+    const user = userEvent.setup();
+    render(<DismissibleDialog closeButtonLabel="Stäng" />);
+
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+
+    expect(screen.getByRole('button', { name: 'Stäng' })).toBeTruthy();
+  });
+
+  it('renders no close button when the host hides it', async () => {
+    mockReducedMotion();
+    const user = userEvent.setup();
+    render(<DismissibleDialog hideCloseButton />);
+
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
+  });
+});

@@ -75,11 +75,12 @@ defaults:
 
 #### Dismissing the dialog
 
-The dialog is dismissable out of the box: clicking the backdrop or pressing Esc
-calls `onClose`, with a `reason` of `'backdropClick'` or `'escapeKeyDown'` so a
-host can tell a dismissal from the `'confirm'` and `'cancel'` the built-in footer
-reports. Focus returns to the element that opened the dialog on the way out —
-that is MUI's focus trap, so it costs nothing extra:
+The dialog is dismissable out of the box, three ways: the × button in its
+top-right corner, a click on the backdrop, or a press of Esc. Each one calls
+`onClose` with a `reason` of `'closeButton'`, `'backdropClick'` or
+`'escapeKeyDown'`, so a host can tell a dismissal from the `'confirm'` and
+`'cancel'` the built-in footer reports. Focus returns to the element that opened
+the dialog on the way out — that is MUI's focus trap, so it costs nothing extra:
 
 ```tsx
 <AnimatedDialog
@@ -93,13 +94,23 @@ that is MUI's focus trap, so it costs nothing extra:
 </AnimatedDialog>
 ```
 
-For a dialog that must be answered — a destructive confirm, say — turn either
-route off. `disableBackdropDismiss` ignores outside clicks and MUI's own
-`disableEscapeKeyDown` ignores the key; the built-in Ok/Cancel footer is then the
-only way out:
+The × sits over the dialog rather than in its flow, so it needs no header of its
+own and shifts nothing below it, and it is the first stop for Tab. Its accessible
+name is `'Close'`; `closeButtonLabel` translates it.
+
+For a dialog that must be answered — a destructive confirm, say — turn the routes
+off. `hideCloseButton` drops the ×, `disableBackdropDismiss` ignores outside
+clicks and MUI's own `disableEscapeKeyDown` ignores the key; the built-in
+Ok/Cancel footer is then the only way out:
 
 ```tsx
-<AnimatedDialog open={open} onClose={close} disableBackdropDismiss disableEscapeKeyDown>
+<AnimatedDialog
+  open={open}
+  onClose={close}
+  hideCloseButton
+  disableBackdropDismiss
+  disableEscapeKeyDown
+>
   {/* … */}
 </AnimatedDialog>
 ```

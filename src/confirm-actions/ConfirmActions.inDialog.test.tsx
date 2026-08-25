@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
@@ -91,9 +91,10 @@ describe('ConfirmActions in a confirmation dialog', () => {
   it('renders the shared pair in the dialog footer, confirm first', async () => {
     await openFlow();
 
-    // Only the dialog's own buttons: MUI hides the trigger from the
-    // accessibility tree for as long as the modal is open.
-    const buttons = screen.getAllByRole('button');
+    // Scoped to the footer, so the dialog's own × close button is not counted;
+    // MUI hides the trigger from the accessibility tree while the modal is open.
+    const footer = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    const buttons = within(footer as HTMLElement).getAllByRole('button');
     expect(buttons.map((button) => button.textContent)).toEqual(['Publish', 'Cancel']);
   });
 
