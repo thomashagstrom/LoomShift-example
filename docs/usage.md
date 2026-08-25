@@ -73,6 +73,37 @@ defaults:
 </AnimatedDialog>
 ```
 
+#### Dismissing the dialog
+
+The dialog is dismissable out of the box: clicking the backdrop or pressing Esc
+calls `onClose`, with a `reason` of `'backdropClick'` or `'escapeKeyDown'` so a
+host can tell a dismissal from the `'confirm'` and `'cancel'` the built-in footer
+reports. Focus returns to the element that opened the dialog on the way out —
+that is MUI's focus trap, so it costs nothing extra:
+
+```tsx
+<AnimatedDialog
+  open={open}
+  onClose={(event, reason) => {
+    if (reason === 'confirm') save();
+    setOpen(false);
+  }}
+>
+  {/* … */}
+</AnimatedDialog>
+```
+
+For a dialog that must be answered — a destructive confirm, say — turn either
+route off. `disableBackdropDismiss` ignores outside clicks and MUI's own
+`disableEscapeKeyDown` ignores the key; the built-in Ok/Cancel footer is then the
+only way out:
+
+```tsx
+<AnimatedDialog open={open} onClose={close} disableBackdropDismiss disableEscapeKeyDown>
+  {/* … */}
+</AnimatedDialog>
+```
+
 #### With `AnimatedStack` as the container
 
 Nest an [`AnimatedStack`](#animatedstack) as the dialog's only child and the
