@@ -179,6 +179,24 @@ export const UndismissableBackdrop: Story = {
   },
 };
 
+export const WithCloseButton: Story = {
+  args: { showCloseButton: true },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The backdrop and Esc are invisible affordances. `showCloseButton` adds a labelled',
+          '`×` to the dialog’s top-right corner as the visible way out: it closes through',
+          '`onClose` with a reason of `closeButton`, and focus returns to the trigger just',
+          'as it does for the other two. It is independent of the footer — the Publish/Cancel',
+          'pair is still here — so a dialog can have both, either or neither. Pass',
+          '`closeButtonProps` for a translated `aria-label` or your own styling.',
+        ].join('\n'),
+      },
+    },
+  },
+};
+
 export const WithAnimatedStack: Story = {
   parameters: {
     docs: {

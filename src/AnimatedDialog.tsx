@@ -2,6 +2,8 @@ import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import type { DialogProps } from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import type { IconButtonProps } from '@mui/material/IconButton';
 import type { TransitionProps } from '@mui/material/transitions';
 import { motion, useReducedMotion } from 'framer-motion';
 import type {
@@ -175,13 +177,18 @@ const MotionTransition = React.forwardRef<HTMLDivElement, MotionTransitionProps>
 );
 
 /**
- * Why the dialog is asking to close: MUI's own reasons, plus the two the
- * built-in footer adds, so a host can tell a confirm from a plain dismissal.
+ * Why the dialog is asking to close: MUI's own reasons, plus the ones the
+ * built-in footer and header add, so a host can tell a confirm from a plain
+ * dismissal.
  */
 export type AnimatedDialogCloseReason =
   | Parameters<NonNullable<DialogProps['onClose']>>[1]
   | 'confirm'
-  | 'cancel';
+  | 'cancel'
+  | 'closeButton';
+
+/** Accessible name of the header's close button, when the host sets none. */
+const DEFAULT_CLOSE_LABEL = 'Close';
 
 export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionComponent' | 'onClose'> {
   /** Enter/exit animation preset. Defaults to `'zoom'`. */
@@ -214,8 +221,21 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
    */
   disableBackdropDismiss?: boolean;
   /**
+   * Render a `×` button in the dialog's top-right corner — an explicit way out
+   * for users who do not know that the backdrop and Esc dismiss. It closes
+   * through `onClose` with a reason of `'closeButton'`. Defaults to `false`.
+   */
+  showCloseButton?: boolean;
+  /**
+   * Escape hatch for that close button — `size`, `sx`, a translated
+   * `aria-label` and the rest of MUI's `IconButtonProps`. `onClick` stays owned
+   * by the dialog, which is what lets it close itself.
+   */
+  closeButtonProps?: Omit<IconButtonProps, 'onClick'>;
+  /**
    * Callback fired when the dialog requests to be closed. Widens MUI's `reason`
-   * with `'confirm'` and `'cancel'` for the built-in footer's two actions.
+   * with `'confirm'` and `'cancel'` for the built-in footer's two actions, and
+   * `'closeButton'` for the header's `×`.
    */
   onClose?: (event: object, reason: AnimatedDialogCloseReason) => void;
 }
@@ -232,6 +252,11 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
  * animation — as its footer, and closes itself through `onClose` once the
  * matching callback has run. Hosts that want a different footer keep composing
  * their own `DialogActions` in `children` instead; the two never both appear.
+ *
+ * Pass `showCloseButton` and the dialog puts a labelled `×` in its top-right
+ * corner, over whatever header the host composed, closing through `onClose`
+ * with a reason of `'closeButton'`. It is independent of the footer: a dialog
+ * can have both, either or neither.
  *
  * A click on the backdrop or a press of Esc asks to close the same way, with a
  * reason of `'backdropClick'` or `'escapeKeyDown'`, and MUI's focus trap hands
@@ -252,6 +277,8 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
       onClose,
       confirmActionsProps,
       disableBackdropDismiss = false,
+      showCloseButton = false,
+      closeButtonProps,
       children,
       ...dialogProps
     },
@@ -313,6 +340,28 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
         }
         {...dialogProps}
       >
+        {showCloseButton ? (
+          // Anchored to the paper rather than to a header of our own: the whole
+          // header is the host's `children`, so the corner is the one spot the
+          // dialog can claim without dictating what goes in it. MUI already
+          // positions the paper `relative`.
+          <IconButton
+            aria-label={DEFAULT_CLOSE_LABEL}
+            size="small"
+            {...closeButtonProps}
+            onClick={() => requestClose('closeButton')}
+            // Array form so a caller's own `sx` composes with the placement
+            // instead of replacing it.
+            sx={[
+              { position: 'absolute', top: 8, right: 8, fontSize: '1.25rem', lineHeight: 1 },
+              ...(Array.isArray(closeButtonProps?.sx)
+                ? closeButtonProps.sx
+                : [closeButtonProps?.sx]),
+            ]}
+          >
+            ×
+          </IconButton>
+        ) : null}
         {children}
         {hasConfirmActions ? (
           <DialogActions>
