@@ -41,6 +41,28 @@ describe('AnimatedDialog', () => {
     expect(screen.getByText('Dialog body')).toBeTruthy();
   });
 
+  it('marks the dialog aria-modal, per the WAI-ARIA Dialog (Modal) Pattern', () => {
+    mockReducedMotion(false);
+    render(
+      <AnimatedDialog open>
+        <p>Dialog body</p>
+      </AnimatedDialog>,
+    );
+
+    expect(screen.getByRole('dialog').getAttribute('aria-modal')).toBe('true');
+  });
+
+  it('lets a host override aria-modal through PaperProps', () => {
+    mockReducedMotion(false);
+    render(
+      <AnimatedDialog open PaperProps={{ 'aria-modal': false }}>
+        <p>Dialog body</p>
+      </AnimatedDialog>,
+    );
+
+    expect(screen.getByRole('dialog').getAttribute('aria-modal')).toBe('false');
+  });
+
   it('does not render dialog content when closed', () => {
     mockReducedMotion(false);
     render(

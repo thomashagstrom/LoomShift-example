@@ -20,6 +20,12 @@ don't know about the other two.
 **Use it when:** you already use dialogs/modals and want them to feel less
 jarring, without changing how they're triggered or what's inside them.
 
+**Accessibility (WAI-ARIA Dialog Pattern):** it conforms to the [WAI-ARIA
+Dialog (Modal) Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/)
+— the role, labelling and focus trap it inherits from MUI's `Dialog`, plus
+`aria-modal` added on top. See the **Decisions** page
+(`docs/Decisions.mdx`) for the full requirement-by-requirement breakdown.
+
 ## AnimatedSnackbar
 
 A small notification banner ("snackbar" or "toast") that slides or fades in
