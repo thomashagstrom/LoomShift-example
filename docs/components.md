@@ -13,7 +13,9 @@ polished feel.
 
 Users can walk away from it the way they expect: clicking outside the dialog or
 pressing Esc closes it, and the button that opened it gets the keyboard's
-attention back. A dialog that must be answered can switch both off.
+attention back. A dialog that must be answered can switch both off. It can also
+show a "×" in the top corner, so there is a visible way out for people who
+don't know about the other two.
 
 **Use it when:** you already use dialogs/modals and want them to feel less
 jarring, without changing how they're triggered or what's inside them.

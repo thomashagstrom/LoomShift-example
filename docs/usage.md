@@ -104,6 +104,22 @@ only way out:
 </AnimatedDialog>
 ```
 
+Neither route is visible on screen, though. `showCloseButton` adds a `×` in the
+dialog's top-right corner — an explicit way out, labelled `Close` for screen
+readers and reachable by keyboard — which reports a `reason` of `'closeButton'`
+and hands focus back to the trigger like any other dismissal:
+
+```tsx
+<AnimatedDialog open={open} onClose={close} showCloseButton>
+  <DialogTitle>Publish release?</DialogTitle>
+  {/* … */}
+</AnimatedDialog>
+```
+
+It is independent of the footer, so a dialog can have both, either or neither.
+`closeButtonProps` forwards MUI's `IconButtonProps` for a translated
+`aria-label`, a different `size` or your own `sx`.
+
 #### With `AnimatedStack` as the container
 
 Nest an [`AnimatedStack`](#animatedstack) as the dialog's only child and the
