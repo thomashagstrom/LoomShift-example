@@ -243,9 +243,11 @@ export interface AnimatedDialogProps extends Omit<DialogProps, 'TransitionCompon
 /**
  * A MUI `Dialog` that animates its enter/exit with Framer Motion out of the box.
  *
- * All MUI `Dialog` props are supported and forwarded, so accessibility roles
- * (`role="dialog"`, `aria-modal`, labelling) and focus trapping are preserved.
- * Users who set `prefers-reduced-motion` get an instant, motion-free transition.
+ * All MUI `Dialog` props are supported and forwarded, so its accessibility
+ * baseline — `role="dialog"`, labelling and focus trapping — is preserved.
+ * `aria-modal="true"` is added on top, since MUI's `Dialog` does not set it
+ * itself; together this conforms to the WAI-ARIA Dialog (Modal) Pattern. Users
+ * who set `prefers-reduced-motion` get an instant, motion-free transition.
  *
  * Pass `onConfirm`/`onCancel` and the dialog appends the shared
  * {@link ConfirmActions} pair — Ok first, Cancel second, both with the press
@@ -280,6 +282,7 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
       showCloseButton = false,
       closeButtonProps,
       children,
+      PaperProps,
       ...dialogProps
     },
     ref,
@@ -338,6 +341,13 @@ export const AnimatedDialog = React.forwardRef<HTMLDivElement, AnimatedDialogPro
             easing,
           } as unknown as TransitionProps
         }
+        // MUI's Dialog sets `role="dialog"` and wires up labelling on this
+        // element, but stops short of `aria-modal` — the WAI-ARIA Dialog
+        // (Modal) Pattern's cue that content outside the dialog is inert.
+        // `PaperProps` is where it lands, since that's the element the role
+        // is on; a host's own `aria-modal` (e.g. to opt out for a non-modal
+        // use) still wins.
+        PaperProps={{ 'aria-modal': true, ...PaperProps }}
         {...dialogProps}
       >
         {showCloseButton ? (

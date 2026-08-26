@@ -34,9 +34,11 @@ npm install @mui/material @emotion/react @emotion/styled framer-motion react rea
 
 A drop-in replacement for MUI's `Dialog` that animates its enter/exit with
 [Framer Motion](https://www.framer.com/motion/) out of the box. Every MUI
-`Dialog` prop is forwarded, so accessibility roles (`role="dialog"`,
-`aria-modal`, labelling) and focus trapping are preserved. It also honours
-`prefers-reduced-motion` by collapsing the animation to an instant transition.
+`Dialog` prop is forwarded, so its accessibility baseline — `role="dialog"`,
+labelling and focus trapping — is preserved, and `aria-modal="true"` is added
+on top so the dialog conforms to the WAI-ARIA Dialog (Modal) Pattern (see
+**Decisions**, `docs/Decisions.mdx`). It also honours `prefers-reduced-motion`
+by collapsing the animation to an instant transition.
 
 ```tsx
 import { useState } from 'react';

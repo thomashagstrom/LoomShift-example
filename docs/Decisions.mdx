@@ -93,9 +93,56 @@ Not chosen, and why:
 </AnimatedDialog>
 ```
 
+## Accessibility: the WAI-ARIA Dialog (Modal) Pattern
+
+**`AnimatedDialog` conforms to the [WAI-ARIA Dialog (Modal)
+Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) — it is a
+thin wrapper over MUI's `Dialog`, so it inherits that pattern's guarantees
+wherever MUI already provides them, and adds the one attribute MUI leaves out.**
+
+| Requirement                                      | Source                                       | Status |
+| ------------------------------------------------- | --------------------------------------------- | ------ |
+| `role="dialog"`                                  | MUI `Dialog`                                 | ✅ built in |
+| `aria-modal="true"`                              | `AnimatedDialog` (`PaperProps`)               | ✅ added — MUI does not set this itself |
+| Labelling (`aria-labelledby`/`aria-describedby`) | MUI `Dialog` + `DialogTitle`                 | ✅ built in — wired automatically once a `DialogTitle` is present, no `id` needed |
+| Keyboard focus trap                              | MUI `Dialog`'s `Modal`/`FocusTrap`            | ✅ built in |
+| Focus lands inside the dialog on open            | MUI `Dialog` (first tabbable, or `autoFocus`) | ✅ built in — the built-in footer sets `autoFocus` on Ok |
+| Focus returns to the trigger on close            | MUI `Dialog`'s focus trap                     | ✅ built in — covered by tests |
+| Esc / backdrop dismissal                         | MUI `Dialog` + `AnimatedDialog`'s reasons     | ✅ built in — either can be turned off per dialog |
+| Screen reader announcement on open               | `role="dialog"` + `aria-modal` + labelling    | ✅ implicit — a labelled, modal dialog is announced by name once focus moves into it; nothing further to wire up |
+| Reduced motion                                   | Framer Motion's `useReducedMotion`            | ✅ built in — see [Motion source](#motion-source-framer-motion) |
+
+Two things to watch, not bugs to fix:
+
+- **A `DialogTitle` is what makes labelling automatic.** Render one — MUI
+  wires its `id` to the dialog's `aria-labelledby` through context — or pass
+  `aria-labelledby` yourself; a dialog with neither has no accessible name.
+- **`disableBackdropDismiss` + `disableEscapeKeyDown` with no footer is an
+  anti-pattern**, not a supported "modal with no exit": pair it with the
+  built-in Ok/Cancel footer (`onConfirm`/`onCancel`) or your own `DialogActions`
+  so there is always a way out.
+
+Not chosen, and why:
+
+- **A hand-rolled `role="dialog"`/focus trap.** MUI's `Dialog` already
+  implements the pattern correctly; duplicating it would just be a second,
+  divergent implementation to keep in sync.
+- **Setting `aria-modal` through the top-level `DialogProps`.** MUI's `Dialog`
+  only forwards unrecognised props onto its `Modal` root, not onto the element
+  with `role="dialog"` — the attribute has to land on the same element as the
+  role, which for MUI is the `Paper`, so `AnimatedDialog` sets it through
+  `PaperProps` instead.
+
+```tsx
+<AnimatedDialog open={open} onClose={close} PaperProps={{ 'aria-modal': false }}>
+  {/* aria-modal is on by default; a host can still override it */}
+</AnimatedDialog>
+```
+
 ## Where each answer lives
 
 | Question                                | Owned by                               |
 | --------------------------------------- | -------------------------------------- |
 | Which animation source do we use?       | `src/shared/animation.ts`              |
 | Button order and first placement        | `src/confirm-actions/ConfirmActions.tsx` |
+| Accessibility conformance               | `src/AnimatedDialog.tsx` (`PaperProps`) |
