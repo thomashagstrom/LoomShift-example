@@ -29,6 +29,11 @@
       "import": "./dist/confirm-actions/index.js",
       "require": "./dist/confirm-actions/index.cjs"
     },
+    "./menu": {
+      "types": "./dist/menu/index.d.ts",
+      "import": "./dist/menu/index.js",
+      "require": "./dist/menu/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -40,8 +45,10 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "toc": "node scripts/generate-toc.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "prepare": "husky",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -70,6 +77,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "framer-motion": "^12.0.0",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",

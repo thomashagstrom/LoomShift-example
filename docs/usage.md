@@ -192,6 +192,49 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
+### `AnimatedMenu`
+
+A drop-in replacement for MUI's `Menu` that animates its enter/exit with
+Framer Motion, built as its own **independent feature slice**. `anchorEl`
+still pops it up from any element on the page, and every MUI `Menu` prop is
+forwarded, so its accessibility baseline — `role="menu"`, roving focus and
+dismissal on Escape or an outside click — is preserved. It reuses the same
+shared animation defaults as the rest of the library:
+
+```tsx
+import { useState } from 'react';
+import { Button, MenuItem } from '@mui/material';
+import { AnimatedMenu } from 'loomshift-example/menu';
+
+function Example() {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  return (
+    <>
+      <Button onClick={(event) => setAnchorEl(event.currentTarget)}>Open menu</Button>
+      <AnimatedMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => setAnchorEl(null)}>Profile</MenuItem>
+        <MenuItem onClick={() => setAnchorEl(null)}>Logout</MenuItem>
+      </AnimatedMenu>
+    </>
+  );
+}
+```
+
+Animation is configured through the same optional, fully typed props as the
+rest of the library — except the preset is `animationVariant`, not the usual
+`variant`, since MUI's `Menu` already has its own `variant` prop
+(`'menu' | 'selectedMenu'`), which stays fully forwarded and untouched:
+
+| Prop               | Type                                              | Default        |
+| ------------------ | -------------------------------------------------- | -------------- |
+| `animationVariant`  | `'fade' \| 'grow' \| 'slide-down' \| 'slide-up'`   | `'grow'`       |
+| `duration`          | `number` (milliseconds)                            | `250`          |
+| `easing`            | Framer Motion easing                               | `'easeInOut'`  |
+
+`'grow'` is the default, matching MUI's own default `Grow` transition for
+`Menu`, so a menu still feels like it grows out of the element that opened it.
+
 ### `ConfirmActions`
 
 The reusable Ok/Cancel pair, published under its own subpath export. Ok comes
