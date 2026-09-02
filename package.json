@@ -34,6 +34,9 @@
   "files": [
     "dist"
   ],
+  "simple-git-hooks": {
+    "pre-commit": "npm run docs:toc:update && git add README.md && npm run docs:toc:check"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -42,6 +45,10 @@
     "test:coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "docs:toc:update": "node scripts/generate-toc.mjs --write",
+    "docs:toc:check": "node scripts/generate-toc.mjs --check",
+    "verify": "npm run docs:toc:check && npm run lint && npm run typecheck && npm run test",
+    "prepare": "simple-git-hooks",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -73,6 +80,7 @@
     "jsdom": "^25.0.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "simple-git-hooks": "^2.14.0",
     "storybook": "^10.5.5",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
