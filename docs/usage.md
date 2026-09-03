@@ -192,6 +192,48 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
+### `AnimatedMenu`
+
+A drop-in replacement for MUI's `Menu` that animates its enter/exit with
+Framer Motion, built as an **independent feature slice** and published under
+its own subpath export. It reuses the same shared animation defaults as the
+rest of the library (`250ms`, `easeInOut`, and the `prefers-reduced-motion`
+handling):
+
+```tsx
+import { useState } from 'react';
+import { Button, MenuItem } from '@mui/material';
+import { AnimatedMenu } from 'loomshift-example/menu';
+
+function Example() {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const open = Boolean(anchorEl);
+
+  return (
+    <>
+      <Button onClick={(event) => setAnchorEl(event.currentTarget)}>Actions</Button>
+      <AnimatedMenu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => setAnchorEl(null)}>Rename</MenuItem>
+        <MenuItem onClick={() => setAnchorEl(null)}>Delete</MenuItem>
+      </AnimatedMenu>
+    </>
+  );
+}
+```
+
+Every MUI `Menu` prop is forwarded, so `anchorEl` — any element, or a ref to
+one — is what triggers it, exactly as with MUI's own `Menu`. Animation is
+configured through the same optional, fully typed props as the rest of the
+library, under `animationVariant` rather than `variant`: MUI's `Menu` already
+uses `variant` for `'menu' | 'selectedMenu'`, and that prop is still
+forwarded untouched.
+
+| Prop               | Type                     | Default       |
+| ------------------ | ------------------------ | ------------- |
+| `animationVariant` | `'fade' \| 'grow'`       | `'fade'`      |
+| `duration`         | `number` (milliseconds) | `250`         |
+| `easing`           | Framer Motion easing     | `'easeInOut'` |
+
 ### `ConfirmActions`
 
 The reusable Ok/Cancel pair, published under its own subpath export. Ok comes
