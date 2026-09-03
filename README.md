@@ -5,6 +5,16 @@ code created by LoomShift GitHub app
 A TypeScript component library scaffold. Built with [tsup](https://tsup.egoist.dev/),
 it emits ESM + CJS bundles and type declarations from a single build command.
 
+## Table of Contents
+
+<!-- START TOC -->
+- [Documentation](#documentation)
+- [Install](#install)
+- [Interactive docs](#interactive-docs)
+- [Development](#development)
+- [Publishing](#publishing)
+<!-- END TOC -->
+
 ## Documentation
 
 - [Components](./docs/components.md) — what each component is and when to use it, in plain language.

@@ -1,0 +1,18 @@
+#!/bin/sh
+# Keeps README.md's table of contents in sync before every commit.
+#
+# Installed via `npm run prepare` (git config core.hooksPath .githooks), or
+# run manually with `npm run toc`.
+#
+# Only runs when README.md is part of the commit, regenerates its TOC, and
+# re-stages the file if the TOC changed. If the TOC is already current the
+# hook is a no-op and never fails the commit.
+
+set -e
+
+if git diff --cached --name-only | grep -qx "README.md"; then
+  node scripts/generate-toc.mjs
+  git add README.md
+fi
+
+exit 0
