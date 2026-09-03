@@ -11,6 +11,15 @@ it emits ESM + CJS bundles and type declarations from a single build command.
 - [Usage](./docs/usage.md) — install steps, peer dependencies, and code examples for every component.
 - [Interactive docs (Storybook)](#interactive-docs) — live previews and editable props.
 
+### Design System Components
+
+- **AnimatedDialog** — a modal dialog that animates in and out, with the same look, behaviour and accessibility as a standard MUI dialog.
+- **AnimatedSnackbar** — a notification banner that slides or fades in to confirm something happened, then disappears on its own.
+- **ConfirmActions** — the "Ok"/"Cancel" button pair used to end a confirmation, with configurable labels and a loading state.
+- **AnimatedStack** — a row/column layout box that eases its contents onto the screen, with an optional subtle background wash.
+
+See [docs/components.md](./docs/components.md) for full descriptions and [docs/usage.md](./docs/usage.md) for code examples.
+
 ## Install
 
 ```sh
