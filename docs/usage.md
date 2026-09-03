@@ -192,6 +192,54 @@ same optional, fully typed props as `AnimatedDialog`:
 | `duration` | `number` (milliseconds)                         | `250`          |
 | `easing`   | Framer Motion easing                            | `'easeInOut'`  |
 
+### `AnimatedMenu`
+
+A drop-in replacement for MUI's `Menu` that animates its enter/exit with
+Framer Motion, built as an **independent feature slice**. It triggers from and
+positions against `anchorEl` exactly like a plain MUI `Menu` — any element, not
+just a `Button` — so accessibility (`role="menu"`, roving focus, Esc and
+outside-click dismissal) and positioning both come from MUI untouched, and
+colours, spacing and typography come from the theme the same way every MUI
+component picks them up:
+
+```tsx
+import { useState } from 'react';
+import { Button, MenuItem } from '@mui/material';
+import { AnimatedMenu } from 'loomshift-example/menu';
+
+function Example() {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  return (
+    <>
+      <Button onClick={(event) => setAnchorEl(event.currentTarget)}>Open menu</Button>
+      <AnimatedMenu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        <MenuItem onClick={() => setAnchorEl(null)}>Profile</MenuItem>
+        <MenuItem onClick={() => setAnchorEl(null)}>Log out</MenuItem>
+      </AnimatedMenu>
+    </>
+  );
+}
+```
+
+Every MUI `Menu` prop is forwarded. Animation is configured through its own
+optional, fully typed props:
+
+| Prop                | Type                                              | Default       |
+| ------------------- | -------------------------------------------------- | ------------- |
+| `transitionVariant` | `'fade' \| 'grow' \| 'slide-down' \| 'slide-up'`   | `'grow'`      |
+| `duration`          | `number` (milliseconds)                            | `250`         |
+| `easing`            | Framer Motion easing                               | `'easeInOut'` |
+
+The animation prop is named `transitionVariant` rather than `variant`, unlike
+the rest of the library — MUI's `Menu` already has its own `variant` prop
+(`'menu' | 'selectedMenu'`, controlling initial focus), and `AnimatedMenu`
+still forwards it untouched.
+
 ### `ConfirmActions`
 
 The reusable Ok/Cancel pair, published under its own subpath export. Ok comes

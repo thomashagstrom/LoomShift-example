@@ -36,6 +36,17 @@ motion so the message feels noticed rather than just appearing and vanishing.
 **Use it when:** you want short-lived confirmations or status messages to
 feel more alive and easier to notice.
 
+## AnimatedMenu
+
+A pop-up list of choices — the kind that drops down from a button, an icon or
+any other trigger — that grows, fades or slides into place instead of just
+appearing. It triggers from and positions against any element the same way a
+plain MUI menu does, so it drops into an existing "⋮" button, a nav item or a
+right-click target without changing how it's wired up.
+
+**Use it when:** you already use MUI menus and want the pop-up itself to feel
+less abrupt, without changing how it's triggered, positioned or dismissed.
+
 ## ConfirmActions
 
 The pair of "Ok" and "Cancel" buttons that ends a confirmation. Any screen can
@@ -78,8 +89,8 @@ Every component in this library keeps all the accessibility behaviour (screen
 reader support, keyboard focus order) of the standard MUI components it is
 built from.
 
-The animated components — `AnimatedDialog`, `AnimatedSnackbar`, `AnimatedStack`
-and the `ConfirmActions` press feedback — also:
+The animated components — `AnimatedDialog`, `AnimatedSnackbar`, `AnimatedMenu`,
+`AnimatedStack` and the `ConfirmActions` press feedback — also:
 
 - Respect users' "reduce motion" accessibility setting by skipping the
   animation for people who need it.
