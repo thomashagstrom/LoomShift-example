@@ -1,0 +1,5 @@
+#!/bin/sh
+# Keeps the README table of contents in sync before every commit.
+# Installed via `npm run prepare` (git config core.hooksPath .githooks).
+node scripts/generate-toc.mjs
+git add README.md
