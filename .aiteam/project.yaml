@@ -1,0 +1,14 @@
+version: 1
+
+# Guardrails every run must respect. Omitted fields fall back to LoomShift's
+# defaults (services/orchestrator/src/config/project-config.ts).
+policy:
+  # Bumped from the $4.50 shipped default (SCRUM-318) after run
+  # run_49963813-974b-4299-9776-d42156bb30e4 (issue #130) halted at $4.75 with
+  # its implementation already committed and verified green — the sunk
+  # implementer cost plus Verifier/QA/PR overhead needed headroom past the
+  # default to land. This is a containment bump, not a fix for the underlying
+  # cost driver (a single 113-turn implementer invocation past the ~110-turn
+  # point where quadratic context-reread cost overtakes linear cost) — see
+  # LoomShift's documentation/backlog-priority.md, SCRUM-322.
+  maxCostUsd: 8
