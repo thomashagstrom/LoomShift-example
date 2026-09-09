@@ -395,6 +395,91 @@ default, but the WCAG AA contrast guarantee is only proven for the theme
 palette: pick brand colours with enough contrast against `background.paper`
 that text on top of them stays legible.
 
+### `AnimatedAccordion`
+
+A drop-in replacement for MUI's `Accordion` that animates its expand/collapse
+with Framer Motion, built as an **independent feature slice**. Every MUI
+`Accordion` prop is forwarded, including its "first child is the summary, the
+rest is the body" composition, so it accepts any number of children exactly
+like the component it wraps:
+
+```tsx
+import { useState } from 'react';
+import { AccordionSummary, AccordionDetails, Typography } from '@mui/material';
+import { AnimatedAccordion } from 'loomshift-example/accordion';
+
+function Example() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <AnimatedAccordion expanded={expanded} onChange={(_e, isExpanded) => setExpanded(isExpanded)}>
+      <AccordionSummary>Shipping</AccordionSummary>
+      <AccordionDetails>
+        <Typography>Orders ship within two business days.</Typography>
+      </AccordionDetails>
+    </AnimatedAccordion>
+  );
+}
+```
+
+Its accessibility baseline — the summary button's `aria-expanded`/
+`aria-controls` and the body's `role="region"` — is preserved untouched, which
+conforms to the [WAI-ARIA Accordion
+Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/). A collapsed
+panel stays mounted (so its children keep their state across toggles, just
+like plain MUI) but is hidden with `visibility: hidden` once fully collapsed,
+so it cannot be tabbed into or announced.
+
+Animation is configured through optional, fully typed props with sensible
+defaults. The animation preset prop is named `animationVariant`, not `variant`
+— MUI's `Accordion` already has its own `variant` (`'elevation' | 'outlined'`),
+inherited from `Paper`:
+
+| Prop               | Type                     | Default        |
+| ------------------ | ------------------------ | -------------- |
+| `animationVariant` | `'collapse' \| 'fade'`   | `'collapse'`   |
+| `duration`         | `number` (milliseconds)  | `250`          |
+| `easing`           | Framer Motion easing     | `'easeInOut'`  |
+
+`'collapse'` animates height only, matching MUI's own `Collapse`. `'fade'`
+layers an opacity fade on top of the same height animation:
+
+```tsx
+<AnimatedAccordion animationVariant="fade" duration={400}>
+  {/* … */}
+</AnimatedAccordion>
+```
+
+Multiple items compose into a list the same way plain MUI accordions do:
+either give each its own `defaultExpanded` for independent multi-expand
+panels, or lift a single `expanded` value up to the list so opening one
+closes the rest:
+
+```tsx
+import { useState } from 'react';
+import { AccordionSummary, AccordionDetails } from '@mui/material';
+import { AnimatedAccordion } from 'loomshift-example/accordion';
+
+function FAQ({ items }: { items: { id: string; question: string; answer: string }[] }) {
+  const [openId, setOpenId] = useState<string | false>(items[0]?.id ?? false);
+
+  return (
+    <>
+      {items.map(({ id, question, answer }) => (
+        <AnimatedAccordion
+          key={id}
+          expanded={openId === id}
+          onChange={(_e, isExpanded) => setOpenId(isExpanded ? id : false)}
+        >
+          <AccordionSummary>{question}</AccordionSummary>
+          <AccordionDetails>{answer}</AccordionDetails>
+        </AnimatedAccordion>
+      ))}
+    </>
+  );
+}
+```
+
 ## Customising or disabling the animation
 
 [Framer Motion](https://www.framer.com/motion/) is the only motion source in the
