@@ -6,6 +6,7 @@ export default defineConfig({
     'src/snackbar/index.ts',
     'src/confirm-actions/index.ts',
     'src/stack/index.ts',
+    'src/accordion/index.ts',
   ],
   format: ['esm', 'cjs'],
   dts: true,

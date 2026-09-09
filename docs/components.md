@@ -36,6 +36,23 @@ motion so the message feels noticed rather than just appearing and vanishing.
 **Use it when:** you want short-lived confirmations or status messages to
 feel more alive and easier to notice.
 
+## AnimatedAccordion
+
+An expand/collapse panel — a heading you tap or click to reveal the content
+underneath, and tap again to hide — that animates its height smoothly instead
+of snapping open and shut. It looks and behaves exactly like a standard MUI
+accordion, including accepting any number of children, so it drops into
+existing pages with no redesign.
+
+Keyboard and screen reader users get the same treatment sighted mouse users
+do: the heading is a real button with the expanded/collapsed state announced,
+and a collapsed panel's content is neither reachable by Tab nor read out,
+because it is genuinely hidden rather than just scrolled out of view.
+
+**Use it when:** you have FAQ-style content, settings sections, or any list of
+items where showing everything at once would be too much, and want the
+reveal to feel considered rather than abrupt.
+
 ## ConfirmActions
 
 The pair of "Ok" and "Cancel" buttons that ends a confirmation. Any screen can
@@ -78,8 +95,8 @@ Every component in this library keeps all the accessibility behaviour (screen
 reader support, keyboard focus order) of the standard MUI components it is
 built from.
 
-The animated components — `AnimatedDialog`, `AnimatedSnackbar`, `AnimatedStack`
-and the `ConfirmActions` press feedback — also:
+The animated components — `AnimatedDialog`, `AnimatedSnackbar`, `AnimatedStack`,
+`AnimatedAccordion` and the `ConfirmActions` press feedback — also:
 
 - Respect users' "reduce motion" accessibility setting by skipping the
   animation for people who need it.
